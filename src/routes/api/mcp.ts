@@ -6,7 +6,7 @@ const PAYMENT_REQUIRED = {
   asset: "USDC",
   max_amount: "0.05",
   recipient: process.env.X402_RECIPIENT ?? "0x0000000000000000000000000000000000000000",
-  note: "Stubbed for v0.1 — wallet address to be set before launch.",
+  note: "Stubbed for v0.1. Wallet address to be set before launch.",
 };
 
 export const Route = createFileRoute("/api/mcp")({
