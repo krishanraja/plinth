@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 
 export const Route = createFileRoute("/docs")({
-  head: () => ({ meta: [{ title: "Docs — Plinth" }, { name: "description", content: "Plinth API and MCP server documentation." }] }),
+  head: () => ({ meta: [{ title: "Docs · Plinth" }, { name: "description", content: "Plinth API and MCP server documentation." }] }),
   component: DocsLayout,
 });
 
@@ -25,6 +25,8 @@ function DocsLayout() {
             <ul className="space-y-1.5">
               <li><Link to="/docs/api/read-product" activeProps={{ className: "text-signal" }} className="text-muted-foreground hover:text-foreground">read_product</Link></li>
               <li><Link to="/docs/api/resolve-product" activeProps={{ className: "text-signal" }} className="text-muted-foreground hover:text-foreground">resolve_product</Link></li>
+              <li><Link to="/docs/webhooks" activeProps={{ className: "text-signal" }} className="text-muted-foreground hover:text-foreground">Webhooks</Link></li>
+              <li><Link to="/docs/rate-limits" activeProps={{ className: "text-signal" }} className="text-muted-foreground hover:text-foreground">Rate limits</Link></li>
               <li><Link to="/docs/errors" activeProps={{ className: "text-signal" }} className="text-muted-foreground hover:text-foreground">Errors</Link></li>
             </ul>
           </div>

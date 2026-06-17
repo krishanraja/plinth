@@ -10,19 +10,20 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Plinth — Product data for agents" },
+      { title: "Plinth · Product data for agents" },
       {
         name: "description",
         content:
-          "One call turns a URL, a barcode, or a fuzzy name into a typed product object — sourced, confidence-scored, cost-stamped. REST + MCP, x402 ready.",
+          "Typed product object from a URL, a barcode, or a fuzzy name. Confidence per field, cost stamped in the response, payable by an agent over MCP and x402.",
       },
-      { property: "og:title", content: "Plinth — Product data for agents" },
+      { property: "og:title", content: "Plinth · Product data for agents" },
       {
         property: "og:description",
         content:
           "Agents can decide what to buy. Reading the product page is where they still break. Plinth reads it for them.",
       },
     ],
+    links: [{ rel: "canonical", href: "/" }],
   }),
   component: Index,
 });
@@ -134,14 +135,14 @@ function Index() {
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-signal">
               Product data for agents
             </p>
-            <h1 className="font-display mt-6 text-5xl leading-[1.02] text-foreground sm:text-6xl lg:text-[4.25rem]">
-              Agents can decide<br/>what to buy.
-              <span className="block italic text-stone mt-2">Reading the product page is where they still break.</span>
+            <h1 className="font-display mt-6 text-5xl leading-[1.05] text-balance text-foreground sm:text-6xl lg:text-[4.25rem]">
+              Agents can decide what to buy.
+              <span className="block italic text-stone mt-3 text-balance max-w-[22ch]">Reading the product page is where they still break.</span>
             </h1>
             <p className="mt-8 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               Plinth reads it for them. One call turns a URL, a barcode, or a fuzzy
-              name into a typed product object — sourced, confidence-scored, with
-              the cost stamped in the response.
+              name into a typed product object. Confidence per field, cost stamped
+              in the response, payable by an agent.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-3 font-mono text-sm">
               <a href="#waitlist" className="inline-flex items-center gap-2 rounded-md bg-signal px-5 py-2.5 font-medium text-background hover:opacity-90">
@@ -256,27 +257,39 @@ function Index() {
       <section className="border-b border-hairline">
         <div className="mx-auto max-w-[1280px] px-6 py-24 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-10">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">§02 · vs DIY</p>
-            <h2 className="font-display mt-3 text-4xl text-foreground">What you'd build yourself.</h2>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">§02 · vs the field</p>
+            <h2 className="font-display mt-3 text-4xl text-balance text-foreground">No one else ships this shape.</h2>
+            <p className="mt-4 text-sm text-muted-foreground">Diffbot has the data. Firecrawl has the render. Neither was built for an agent to call and pay on its own.</p>
           </div>
-          <div className="overflow-hidden rounded-md border border-hairline">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto rounded-md border border-hairline">
+            <table className="w-full text-sm min-w-[720px]">
               <thead className="bg-surface text-left font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                <tr><th className="px-5 py-3">Concern</th><th className="px-5 py-3">DIY stack</th><th className="px-5 py-3 text-signal">Plinth</th></tr>
+                <tr>
+                  <th className="px-4 py-3">Capability</th>
+                  <th className="px-4 py-3 text-signal">Plinth</th>
+                  <th className="px-4 py-3">Diffbot</th>
+                  <th className="px-4 py-3">Zyte</th>
+                  <th className="px-4 py-3">Firecrawl + LLM</th>
+                  <th className="px-4 py-3">DIY</th>
+                </tr>
               </thead>
-              <tbody className="divide-y divide-hairline">
+              <tbody className="divide-y divide-hairline font-mono text-xs">
                 {[
-                  ["JSON-LD / OG parsing", "schema.org parser + fallbacks", "built-in"],
-                  ["Headless render", "Browserless / Playwright pool", "managed"],
-                  ["Barcode lookup", "UPCitemdb / go-upc account", "merged"],
-                  ["Cache", "Redis + TTL policy", "7d/1h, keyed"],
-                  ["Confidence", "you score it yourself", "0–1 per field + overall"],
-                  ["Cost tracking", "best guess", "stamped per response"],
-                ].map(([a,b,c]) => (
-                  <tr key={a} className="bg-background">
-                    <td className="px-5 py-4 text-foreground">{a}</td>
-                    <td className="px-5 py-4 text-muted-foreground">{b}</td>
-                    <td className="px-5 py-4 font-mono text-signal">{c}</td>
+                  ["Typed product object",        "yes",   "yes",   "yes",   "you write the schema", "you write the schema"],
+                  ["Confidence per field",        "yes",   "no",    "no",    "no",                    "you score it"],
+                  ["Cost stamped in response",    "yes",   "no",    "no",    "no",                    "best guess"],
+                  ["MCP server",                  "yes",   "no",    "no",    "no",                    "you build it"],
+                  ["x402 micropayments",          "yes",   "no",    "no",    "no",                    "no"],
+                  ["Fuzzy name resolve",          "yes",   "partial","partial","you glue it",         "you glue it"],
+                  ["Price as a band + as_of",     "yes",   "single",  "single",  "single",            "single"],
+                ].map(([k, p, d, z, f, diy]) => (
+                  <tr key={k} className="bg-background">
+                    <td className="px-4 py-3 text-foreground">{k}</td>
+                    <td className="px-4 py-3 text-signal">{p}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{d}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{z}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{f}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{diy}</td>
                   </tr>
                 ))}
               </tbody>
@@ -362,10 +375,12 @@ function Index() {
           </div>
           <div className="divide-y divide-hairline border-y border-hairline">
             {[
-              ["Where does the data come from?", "JSON-LD / OpenGraph first, headless render fallback, barcode DBs for GTIN. Source method is on every response."],
+              ["Where does the data come from?", "JSON-LD and OpenGraph first, headless render fallback, barcode databases for GTIN. The source method is on every response."],
               ["Why a confidence score?", "Because product pages lie. We tell you how sure we are per field and overall. You decide the threshold."],
               ["Is price live?", "Price is a band with an as_of timestamp and a source count. We do not present a single live number as truth."],
-              ["What's x402?", "An open micropayment standard. Agents pay per call in USDC over Base — no signup, no key rotation."],
+              ["What's x402?", "An open micropayment standard. Agents pay per call in USDC on Base. No signup, no key rotation."],
+              ["Why not Diffbot?", "Diffbot returns a typed object. It does not score confidence per field, does not stamp cost in the response, and has no MCP server or x402 surface. An agent cannot discover it and pay on its own."],
+              ["Why not roll your own with Firecrawl + GPT?", "You can. You also own the schema, the cache policy, the confidence rubric, the price-band semantics, the barcode merge, the MCP server, and the x402 settlement. Plinth is that work, finished, behind one call."],
               ["Can a site request takedown?", <>Yes. <a href="/takedown" className="text-signal underline">File here</a>. We honor it within 24h.</>],
             ].map(([q, a], i) => (
               <details key={i} className="group py-5">

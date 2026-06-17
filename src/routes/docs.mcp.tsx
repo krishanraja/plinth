@@ -15,7 +15,7 @@ Accept: application/json, text/event-stream`}
       <h2 className="font-display text-2xl mt-6">Payment (x402)</h2>
       <p className="text-muted-foreground">
         Tool calls without a valid payment header return <span className="font-mono">402 Payment Required</span> with payment instructions.
-        Currently settled on <strong>Base Sepolia</strong> (testnet) — mainnet flip on GA.
+        Currently settled on <strong>Base Sepolia</strong> (testnet). Mainnet flip on GA.
       </p>
       <pre className="rounded-md border border-hairline bg-surface p-5 font-mono text-sm overflow-x-auto">
 {`402 Payment Required

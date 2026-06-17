@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/lib/auth";
+import logo from "@/assets/plinth-logo.png.asset.json";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -9,10 +10,9 @@ export function SiteHeader() {
   return (
     <header className="border-b border-hairline bg-background/70 backdrop-blur sticky top-0 z-30">
       <div className="mx-auto flex max-w-[1280px] items-center justify-between px-6 py-4 font-mono text-xs">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="dot" aria-hidden />
-          <span className="font-display text-xl text-foreground">plinth</span>
-          <span className="ml-2 text-muted-foreground hidden sm:inline">/ product data for agents</span>
+        <Link to="/" className="flex items-center gap-3">
+          <img src={logo.url} alt="plinth" className="h-7 w-auto" />
+          <span className="text-muted-foreground hidden sm:inline">product data for agents</span>
         </Link>
         <nav className="hidden items-center gap-7 text-muted-foreground md:flex">
           <Link to="/docs" className="hover:text-foreground">docs</Link>

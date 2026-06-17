@@ -3,7 +3,7 @@ const ROWS: [string, string, string][] = [
   ["400","invalid_request","Body missing url, gtin, or query."],
   ["401","missing_key","No Authorization header."],
   ["403","key_revoked","Key has been revoked or account suspended."],
-  ["402","payment_required","x402 flow — see MCP docs."],
+  ["402","payment_required","x402 flow. See MCP docs."],
   ["404","not_resolvable","Reference could not be resolved with sufficient confidence."],
   ["422","low_confidence","Resolved below 0.7; not cached."],
   ["429","rate_limited","Per-key burst or sustained rate exceeded."],
