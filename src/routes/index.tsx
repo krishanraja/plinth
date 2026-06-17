@@ -1,5 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { SiteHeader } from "@/components/site/SiteHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -8,7 +14,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "One call. Clean object. Cost stamped. Plinth turns a URL, barcode, or fuzzy name into a typed product object for agents.",
+          "One call turns a URL, a barcode, or a fuzzy name into a typed product object — sourced, confidence-scored, cost-stamped. REST + MCP, x402 ready.",
+      },
+      { property: "og:title", content: "Plinth — Product data for agents" },
+      {
+        property: "og:description",
+        content:
+          "Agents can decide what to buy. Reading the product page is where they still break. Plinth reads it for them.",
       },
     ],
   }),
@@ -19,34 +31,30 @@ type Line = { text: string; cls?: string; delay: number };
 
 const RESPONSE_LINES: Line[] = [
   { text: "{", delay: 0 },
-  { text: '  "canonical": {', delay: 120 },
-  { text: '    "gtin":  "00194253433767",', delay: 80 },
-  { text: '    "mpn":   "MX2Y3LL/A",', delay: 80 },
-  { text: '    "brand": "Apple",', delay: 80 },
-  { text: '    "model": "MacBook Pro 16-inch (M3 Pro, 2024)"', delay: 80 },
+  { text: '  "canonical": {', delay: 90 },
+  { text: '    "gtin":  "00194253433767",', delay: 60 },
+  { text: '    "brand": "Apple",', delay: 60 },
+  { text: '    "model": "MacBook Pro 16-inch (M3 Pro, 2024)"', delay: 60 },
   { text: "  },", delay: 60 },
-  { text: '  "title": "Apple MacBook Pro 16\\" M3 Pro 1TB Space Black",', delay: 100 },
-  { text: '  "category": { "code": "ELEC.COMPUTERS.LAPTOPS" },', delay: 90 },
-  { text: '  "attributes": {', delay: 90 },
-  { text: '    "screen_size_in": 16.2,', delay: 60 },
-  { text: '    "storage_gb":     1024,', delay: 60 },
-  { text: '    "ram_gb":         18,', delay: 60 },
-  { text: '    "color":          "Space Black"', delay: 60 },
-  { text: "  },", delay: 60 },
-  { text: '  "price": {', delay: 120 },
-  { text: '    "band":      { "low": 2399.00, "high": 2699.00, "currency": "USD" },', delay: 80 },
-  { text: '    "as_of":     "2026-06-17T14:00:00Z",', delay: 60 },
-  { text: '    "n_sources": 3,', delay: 60 },
-  { text: '    "confidence": 0.74', delay: 60 },
-  { text: "  },", delay: 60 },
-  { text: '  "source": { "method": "jsonld", "urls": ["apple.com/…"] },', delay: 120 },
-  { text: '  "confidence": 0.81,', cls: "text-[color:var(--verified)]", delay: 220 },
-  { text: '  "cost_usd":   0.012', cls: "text-signal", delay: 220 },
-  { text: "}", delay: 100 },
+  { text: '  "title": "Apple MacBook Pro 16\\" M3 Pro 1TB Space Black",', delay: 80 },
+  { text: '  "attributes": {', delay: 70 },
+  { text: '    "screen_size_in": 16.2,', delay: 50 },
+  { text: '    "storage_gb":     1024,', delay: 50 },
+  { text: '    "color":          "Space Black"', delay: 50 },
+  { text: "  },", delay: 50 },
+  { text: '  "price": {', delay: 90 },
+  { text: '    "band":      { "low": 2399, "high": 2699, "currency": "USD" },', delay: 70 },
+  { text: '    "as_of":     "2026-06-17T14:00:00Z",', delay: 50 },
+  { text: '    "n_sources": 3', delay: 50 },
+  { text: "  },", delay: 50 },
+  { text: '  "source": { "method": "jsonld", "urls": ["apple.com/…"] },', delay: 90 },
+  { text: '  "confidence": 0.81,', cls: "text-signal", delay: 180 },
+  { text: '  "cost_usd":   0.012', cls: "text-signal", delay: 180 },
+  { text: "}", delay: 80 },
 ];
 
 const TOOLS = [
-  { name: "read_product", desc: "One reference → typed product object.", live: true },
+  { name: "read_product", desc: "One reference (URL/GTIN) → typed product object.", live: true },
   { name: "resolve_product", desc: "Fuzzy string → canonical identifiers.", live: true },
   { name: "compare_products", desc: "N references → matrix of deltas.", live: false },
   { name: "brief_product", desc: "Object + short read for the agent.", live: false },
@@ -57,21 +65,58 @@ function useStream(lines: Line[]) {
   const cumulative = useMemo(() => {
     const out: number[] = [];
     let t = 400;
-    for (const l of lines) {
-      t += l.delay;
-      out.push(t);
-    }
+    for (const l of lines) { t += l.delay; out.push(t); }
     return out;
   }, [lines]);
-
   useEffect(() => {
-    const timers = cumulative.map((t, i) =>
-      setTimeout(() => setShown((s) => Math.max(s, i + 1)), t),
-    );
+    const timers = cumulative.map((t, i) => setTimeout(() => setShown((s) => Math.max(s, i + 1)), t));
     return () => timers.forEach(clearTimeout);
   }, [cumulative]);
-
   return shown;
+}
+
+function WaitlistForm() {
+  const [email, setEmail] = useState("");
+  const [company, setCompany] = useState("");
+  const [useCase, setUseCase] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    const { error } = await supabase.from("waitlist").insert({
+      email, company: company || null, use_case: useCase || null, source: "landing",
+    });
+    setSubmitting(false);
+    if (error && !error.message.includes("duplicate")) {
+      toast.error(error.message);
+      return;
+    }
+    setDone(true);
+  }
+
+  if (done) {
+    return (
+      <div className="rounded-md border border-hairline bg-surface p-6">
+        <div className="font-display text-2xl text-foreground">You're on the list.</div>
+        <p className="mt-2 text-sm text-muted-foreground">
+          We're approving developers in small batches. Watch your inbox.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto]">
+      <Input required type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-surface" />
+      <Input placeholder="Company (optional)" value={company} onChange={(e) => setCompany(e.target.value)} className="bg-surface" />
+      <Button type="submit" disabled={submitting} className="bg-signal text-background hover:opacity-90">
+        {submitting ? "…" : "Request access"}
+      </Button>
+      <Input placeholder="What are you building? (optional)" value={useCase} onChange={(e) => setUseCase(e.target.value)} className="bg-surface sm:col-span-3" />
+    </form>
+  );
 }
 
 function Index() {
@@ -80,82 +125,41 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-hairline">
-        <div className="mx-auto flex max-w-[1280px] items-center justify-between px-6 py-4 font-mono text-xs">
-          <div className="flex items-center gap-2">
-            <span className="dot" aria-hidden />
-            <span className="font-display text-base font-bold tracking-tight text-foreground">
-              plinth
-            </span>
-            <span className="ml-3 text-muted-foreground">v0.1 · pre-release</span>
-          </div>
-          <nav className="hidden items-center gap-6 text-muted-foreground sm:flex">
-            <a href="#tools" className="hover:text-foreground">tools</a>
-            <a href="#schema" className="hover:text-foreground">schema</a>
-            <a href="#pricing" className="hover:text-foreground">pricing</a>
-            <a href="#mcp" className="hover:text-foreground">mcp</a>
-            <a
-              href="#docs"
-              className="rounded-sm border border-hairline px-3 py-1.5 text-foreground hover:border-signal hover:text-signal"
-            >
-              read the docs
-            </a>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
+      {/* HERO */}
       <section className="border-b border-hairline">
-        <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-6 py-16 lg:grid-cols-[1fr_1.15fr] lg:gap-14 lg:py-24">
+        <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-12 px-6 py-20 lg:grid-cols-[1fr_1.1fr] lg:py-28">
           <div className="flex flex-col justify-center">
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-signal">
               Product data for agents
             </p>
-            <h1 className="font-display mt-6 text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-[3.25rem]">
-              Agents can decide what to buy.
-              <br />
-              <span className="text-muted-foreground">
-                Reading the product page is where they still break.
-              </span>
+            <h1 className="font-display mt-6 text-5xl leading-[1.02] text-foreground sm:text-6xl lg:text-[4.25rem]">
+              Agents can decide<br/>what to buy.
+              <span className="block italic text-stone mt-2">Reading the product page is where they still break.</span>
             </h1>
             <p className="mt-8 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               Plinth reads it for them. One call turns a URL, a barcode, or a fuzzy
               name into a typed product object — sourced, confidence-scored, with
               the cost stamped in the response.
             </p>
-
             <div className="mt-10 flex flex-wrap items-center gap-3 font-mono text-sm">
-              <a
-                href="#docs"
-                className="inline-flex items-center gap-2 rounded-sm bg-signal px-4 py-2.5 font-medium text-ink transition-opacity hover:opacity-90"
-              >
-                Read the docs <span aria-hidden>→</span>
+              <a href="#waitlist" className="inline-flex items-center gap-2 rounded-md bg-signal px-5 py-2.5 font-medium text-background hover:opacity-90">
+                Request access <span aria-hidden>→</span>
               </a>
-              <a
-                href="#hero"
-                className="inline-flex items-center gap-2 rounded-sm border border-hairline px-4 py-2.5 text-foreground hover:border-foreground"
-              >
-                Run a call
+              <a href="/docs" className="inline-flex items-center gap-2 rounded-md border border-hairline px-5 py-2.5 text-foreground hover:border-foreground">
+                Read the docs
               </a>
             </div>
-
             <dl className="mt-12 grid grid-cols-3 gap-6 border-t border-hairline pt-6 font-mono text-xs">
-              <div>
-                <dt className="text-muted-foreground">p50 cached</dt>
-                <dd className="mt-1 text-foreground">~80ms</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">per call</dt>
-                <dd className="mt-1 text-foreground">from $0.01</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">payment</dt>
-                <dd className="mt-1 text-foreground">key · x402</dd>
-              </div>
+              <div><dt className="text-muted-foreground">p50 cached</dt><dd className="mt-1 text-foreground">~80ms</dd></div>
+              <div><dt className="text-muted-foreground">per call</dt><dd className="mt-1 text-foreground">from $0.01</dd></div>
+              <div><dt className="text-muted-foreground">payment</dt><dd className="mt-1 text-foreground">key · x402</dd></div>
             </dl>
           </div>
 
-          <div id="hero" className="lg:pl-4">
-            <div className="overflow-hidden rounded-md border border-hairline bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.02),0_30px_60px_-30px_rgba(0,0,0,0.6)]">
+          <div className="lg:pl-4">
+            <div className="overflow-hidden rounded-md border border-hairline bg-surface shadow-[0_30px_60px_-30px_rgba(14,27,44,0.25)]">
               <div className="flex items-center justify-between border-b border-hairline px-4 py-3 font-mono text-xs">
                 <div className="flex items-center gap-2">
                   <span className="rounded-sm bg-signal/15 px-1.5 py-0.5 text-signal">POST</span>
@@ -163,37 +167,26 @@ function Index() {
                   <span className="text-foreground">read_product</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <span
-                    className={`dot ${done ? "" : "animate-pulse"}`}
-                    style={{ background: done ? "var(--verified)" : "var(--signal)" }}
-                  />
+                  <span className={`dot ${done ? "" : "animate-pulse"}`} />
                   <span>{done ? "200 OK" : "streaming"}</span>
                 </div>
               </div>
-
               <div className="border-b border-hairline px-4 py-3 font-mono text-xs leading-relaxed">
                 <span className="text-muted-foreground">{"{ "}</span>
                 <span className="text-foreground">"url"</span>
                 <span className="text-muted-foreground">: </span>
-                <span className="text-signal break-all">
-                  "https://www.apple.com/shop/buy-mac/macbook-pro/16-inch"
-                </span>
+                <span className="text-signal break-all">"https://www.apple.com/shop/buy-mac/macbook-pro/16-inch"</span>
                 <span className="text-muted-foreground">{" }"}</span>
               </div>
-
               <div className="px-4 py-4">
                 <div className="mb-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  <span>response</span>
-                  <span>application/json</span>
+                  <span>response</span><span>application/json</span>
                 </div>
-                <pre className="min-h-[460px] overflow-x-auto font-mono text-[12.5px] leading-[1.7] text-foreground">
+                <pre className="min-h-[440px] overflow-x-auto font-mono text-[12.5px] leading-[1.7] text-foreground">
                   {RESPONSE_LINES.slice(0, shown).map((l, i) => {
                     const isLast = i === shown - 1 && !done;
                     return (
-                      <div
-                        key={i}
-                        className={`stream-line ${l.cls ?? ""} ${isLast ? "caret" : ""}`}
-                      >
+                      <div key={i} className={`stream-line ${l.cls ?? ""} ${isLast ? "caret" : ""}`}>
                         {l.text || "\u00A0"}
                       </div>
                     );
@@ -201,65 +194,57 @@ function Index() {
                   {shown === 0 && <div className="caret">&nbsp;</div>}
                 </pre>
               </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-hairline px-4 py-3 font-mono text-xs">
-                <div className="flex items-center gap-4 text-muted-foreground">
-                  <span>
-                    method <span className="text-foreground">jsonld</span>
-                  </span>
-                  <span>
-                    cached <span className="text-foreground">false</span>
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-muted-foreground">
-                    confidence{" "}
-                    <span className="text-[color:var(--verified)]">{done ? "0.81" : "—"}</span>
-                  </span>
-                  <span className="text-muted-foreground">
-                    cost <span className="text-signal">{done ? "$0.012" : "—"}</span>
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="tools" className="border-b border-hairline">
-        <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-6 py-20 lg:grid-cols-[260px_1fr]">
+      {/* THESIS */}
+      <section id="thesis" className="border-b border-hairline">
+        <div className="mx-auto max-w-[1280px] px-6 py-24 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-12">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              §01 · tools
-            </p>
-            <h2 className="font-display mt-3 text-2xl font-bold tracking-tight">
-              Four questions an agent actually asks.
-            </h2>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Not endpoints. The shape of the call matches the shape of the problem.
-            </p>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">§00 · thesis</p>
+            <h2 className="font-display mt-3 text-4xl text-foreground">Who it's for.</h2>
+          </div>
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+            <div>
+              <div className="font-display text-2xl text-foreground">Devs</div>
+              <p className="mt-3 text-muted-foreground">
+                You're writing the buy-flow for an agent. You don't want to maintain a
+                JSON-LD parser, a headless Chrome fleet, a barcode lookup, and a price
+                cache. You want one call that returns the same shape every time.
+              </p>
+            </div>
+            <div>
+              <div className="font-display text-2xl text-foreground">Agents</div>
+              <p className="mt-3 text-muted-foreground">
+                Discover the MCP server, call <span className="font-mono text-signal">read_product</span>,
+                pay per call in USDC over x402. No account. No key rotation. The cost is
+                in the response so you can decide whether to keep going.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TOOLS */}
+      <section id="tools" className="border-b border-hairline bg-surface/40">
+        <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-6 py-24 lg:grid-cols-[280px_1fr]">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">§01 · tools</p>
+            <h2 className="font-display mt-3 text-4xl text-foreground">Four questions an agent actually asks.</h2>
+            <p className="mt-4 text-sm text-muted-foreground">Not endpoints. The shape of the call matches the shape of the problem.</p>
           </div>
           <div className="divide-y divide-hairline border-y border-hairline">
             {TOOLS.map((t) => (
-              <div
-                key={t.name}
-                className="grid grid-cols-[1fr_auto] items-center gap-6 py-5 font-mono text-sm"
-              >
-                <div>
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span className="text-foreground">{t.name}</span>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="text-muted-foreground">{t.desc}</span>
-                  </div>
+              <div key={t.name} className="grid grid-cols-[1fr_auto] items-center gap-6 py-5 font-mono text-sm">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="text-foreground">{t.name}</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="text-muted-foreground">{t.desc}</span>
                 </div>
-                <span
-                  className={`rounded-sm border px-2 py-0.5 text-[10px] uppercase tracking-widest ${
-                    t.live
-                      ? "border-[color:var(--verified)]/40 text-[color:var(--verified)]"
-                      : "border-hairline text-muted-foreground"
-                  }`}
-                >
-                  {t.live ? "shipping" : "day 4"}
+                <span className={`rounded-sm border px-2 py-0.5 text-[10px] uppercase tracking-widest ${t.live ? "border-signal/50 text-signal" : "border-hairline text-muted-foreground"}`}>
+                  {t.live ? "shipping" : "soon"}
                 </span>
               </div>
             ))}
@@ -267,109 +252,100 @@ function Index() {
         </div>
       </section>
 
-      <section id="schema" className="border-b border-hairline">
-        <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-6 py-20 lg:grid-cols-[260px_1fr]">
+      {/* COMPARISON */}
+      <section className="border-b border-hairline">
+        <div className="mx-auto max-w-[1280px] px-6 py-24 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-10">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              §02 · the object
-            </p>
-            <h2 className="font-display mt-3 text-2xl font-bold tracking-tight">
-              Typed, sourced, scored.
-            </h2>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Every field carries a confidence or an{" "}
-              <code className="font-mono text-foreground">as_of</code>. Price is a
-              band with a timestamp — never a single live number presented as truth.
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">§02 · vs DIY</p>
+            <h2 className="font-display mt-3 text-4xl text-foreground">What you'd build yourself.</h2>
+          </div>
+          <div className="overflow-hidden rounded-md border border-hairline">
+            <table className="w-full text-sm">
+              <thead className="bg-surface text-left font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                <tr><th className="px-5 py-3">Concern</th><th className="px-5 py-3">DIY stack</th><th className="px-5 py-3 text-signal">Plinth</th></tr>
+              </thead>
+              <tbody className="divide-y divide-hairline">
+                {[
+                  ["JSON-LD / OG parsing", "schema.org parser + fallbacks", "built-in"],
+                  ["Headless render", "Browserless / Playwright pool", "managed"],
+                  ["Barcode lookup", "UPCitemdb / go-upc account", "merged"],
+                  ["Cache", "Redis + TTL policy", "7d/1h, keyed"],
+                  ["Confidence", "you score it yourself", "0–1 per field + overall"],
+                  ["Cost tracking", "best guess", "stamped per response"],
+                ].map(([a,b,c]) => (
+                  <tr key={a} className="bg-background">
+                    <td className="px-5 py-4 text-foreground">{a}</td>
+                    <td className="px-5 py-4 text-muted-foreground">{b}</td>
+                    <td className="px-5 py-4 font-mono text-signal">{c}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section id="pricing" className="border-b border-hairline bg-surface/40">
+        <div className="mx-auto max-w-[1280px] px-6 py-24">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">§03 · pricing</p>
+            <h2 className="font-display mt-3 text-5xl text-foreground">Per call. No seats.</h2>
+            <p className="mt-4 text-muted-foreground">
+              Devs pay with a key, metered through Stripe. Agents pay with USDC on Base via x402.
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {[
-              { k: "canonical", v: "gtin · mpn · brand · model" },
-              { k: "attributes", v: "normalized to category schema" },
-              { k: "price.band", v: "low / high / currency + as_of" },
-              { k: "source", v: "jsonld · opengraph · barcode_db · cache" },
-              { k: "confidence", v: "0–1, per field and overall" },
-              { k: "cost_usd", v: "stamped on every response" },
-            ].map((f) => (
-              <div
-                key={f.k}
-                className="rounded-md border border-hairline bg-surface p-5 font-mono text-sm"
-              >
-                <div className="text-signal">{f.k}</div>
-                <div className="mt-1 text-muted-foreground">{f.v}</div>
+              { name: "Free", price: "$0", desc: "1,000 calls/mo · card required", feats: ["Single secret API key","REST + MCP","Email support"] },
+              { name: "Starter", price: "$29", desc: "5,000 calls included · $0.01 overage", feats: ["Webhooks","All confidence levels","Priority email"], featured: true },
+              { name: "Growth", price: "$199", desc: "50,000 calls included · $0.005 overage", feats: ["Higher rate limits","Slack channel","SLA"] },
+            ].map((p) => (
+              <div key={p.name} className={`rounded-md border p-7 ${p.featured ? "border-signal bg-background" : "border-hairline bg-background"}`}>
+                <div className="flex items-baseline justify-between">
+                  <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">{p.name}</div>
+                  {p.featured && <div className="font-mono text-[10px] uppercase tracking-widest text-signal">recommended</div>}
+                </div>
+                <div className="font-display text-5xl text-foreground mt-3">{p.price}<span className="text-base text-muted-foreground">/mo</span></div>
+                <div className="mt-2 text-sm text-muted-foreground">{p.desc}</div>
+                <ul className="mt-6 space-y-2 text-sm text-foreground">
+                  {p.feats.map((f) => (<li key={f} className="flex gap-2"><span className="text-signal">→</span>{f}</li>))}
+                </ul>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="pricing" className="border-b border-hairline">
-        <div className="mx-auto max-w-[1280px] px-6 py-20">
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[260px_1fr]">
-            <div>
-              <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                §03 · pricing
-              </p>
-              <h2 className="font-display mt-3 text-2xl font-bold tracking-tight">
-                Per call. No seats.
-              </h2>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Devs pay with a key, metered through Stripe. Agents pay with USDC
-                on Base via x402. Same core, same response.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-md border border-hairline bg-hairline sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { name: "read_product (cached)", price: "~$0.01" },
-                { name: "read_product (live)", price: "~$0.02" },
-                { name: "resolve_product", price: "$0.03–0.05" },
-                { name: "brief_product", price: "$0.05" },
-              ].map((p) => (
-                <div key={p.name} className="bg-background p-6 font-mono">
-                  <div className="text-xs text-muted-foreground">{p.name}</div>
-                  <div className="mt-3 text-2xl text-foreground">{p.price}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
+      {/* SURFACES */}
       <section id="mcp" className="border-b border-hairline">
-        <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-6 py-20 lg:grid-cols-[260px_1fr]">
+        <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-6 py-24 lg:grid-cols-[280px_1fr]">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              §04 · surfaces
-            </p>
-            <h2 className="font-display mt-3 text-2xl font-bold tracking-tight">
-              REST for you. MCP for them.
-            </h2>
-            <p className="mt-3 text-sm text-muted-foreground">
-              The same core, two surfaces. Devs hold a key. Agents discover the
-              server and pay per call. No signup in the agent path.
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">§04 · surfaces</p>
+            <h2 className="font-display mt-3 text-4xl text-foreground">REST for you. MCP for them.</h2>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Same core, two surfaces. Devs hold a key. Agents discover the server and pay per call.
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div className="rounded-md border border-hairline bg-surface p-6">
               <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                <span className="dot" style={{ background: "var(--verified)" }} />
-                dev · REST
+                <span className="dot" /> dev · REST
               </div>
               <pre className="mt-5 overflow-x-auto font-mono text-xs leading-relaxed text-foreground">
 {`curl https://plinth.sh/v1/read_product \\
-  -H "authorization: Bearer plinth_sk_…" \\
+  -H "authorization: Bearer plk_…" \\
   -d '{ "url": "https://store.com/p/123" }'`}
               </pre>
             </div>
             <div className="rounded-md border border-hairline bg-surface p-6">
               <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                <span className="dot" style={{ background: "var(--signal)" }} />
-                agent · MCP + x402
+                <span className="dot" style={{ background: "var(--verified)" }} /> agent · MCP + x402
               </div>
               <pre className="mt-5 overflow-x-auto font-mono text-xs leading-relaxed text-foreground">
-{`mcp://plinth.sh
+{`mcp://plinth.sh/api/mcp
   tool: read_product
-  pay:  USDC on Base
+  pay:  USDC on Base Sepolia
   → { …object, cost_usd: 0.012 }`}
               </pre>
             </div>
@@ -377,28 +353,46 @@ function Index() {
         </div>
       </section>
 
-      <footer id="docs">
-        <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-6 py-12 font-mono text-xs sm:flex-row sm:items-end sm:justify-between">
+      {/* FAQ */}
+      <section id="faq" className="border-b border-hairline bg-surface/40">
+        <div className="mx-auto max-w-[1280px] px-6 py-24 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-10">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="dot" />
-              <span className="font-display text-base font-bold text-foreground">
-                plinth
-              </span>
-            </div>
-            <p className="mt-3 max-w-sm text-muted-foreground">
-              The foundation a product-aware agent stands on.
-            </p>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">§05 · FAQ</p>
+            <h2 className="font-display mt-3 text-4xl text-foreground">Quick answers.</h2>
           </div>
-          <div className="flex flex-wrap gap-x-8 gap-y-2 text-muted-foreground">
-            <a href="#tools" className="hover:text-foreground">tools</a>
-            <a href="#schema" className="hover:text-foreground">schema</a>
-            <a href="#pricing" className="hover:text-foreground">pricing</a>
-            <a href="#mcp" className="hover:text-foreground">mcp</a>
-            <span className="text-muted-foreground/60">/ status: pre-release</span>
+          <div className="divide-y divide-hairline border-y border-hairline">
+            {[
+              ["Where does the data come from?", "JSON-LD / OpenGraph first, headless render fallback, barcode DBs for GTIN. Source method is on every response."],
+              ["Why a confidence score?", "Because product pages lie. We tell you how sure we are per field and overall. You decide the threshold."],
+              ["Is price live?", "Price is a band with an as_of timestamp and a source count. We do not present a single live number as truth."],
+              ["What's x402?", "An open micropayment standard. Agents pay per call in USDC over Base — no signup, no key rotation."],
+              ["Can a site request takedown?", <>Yes. <a href="/takedown" className="text-signal underline">File here</a>. We honor it within 24h.</>],
+            ].map(([q, a], i) => (
+              <details key={i} className="group py-5">
+                <summary className="flex cursor-pointer items-center justify-between gap-4">
+                  <span className="font-display text-xl text-foreground">{q}</span>
+                  <span className="font-mono text-signal group-open:rotate-45 transition">+</span>
+                </summary>
+                <p className="mt-3 text-muted-foreground">{a}</p>
+              </details>
+            ))}
           </div>
         </div>
-      </footer>
+      </section>
+
+      {/* WAITLIST */}
+      <section id="waitlist" className="border-b border-hairline">
+        <div className="mx-auto max-w-[820px] px-6 py-24 text-center">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-signal">Limited beta</p>
+          <h2 className="font-display mt-4 text-5xl text-foreground">Request access.</h2>
+          <p className="mt-4 text-muted-foreground">
+            We're approving small batches of developers each week. Tell us what you're building.
+          </p>
+          <div className="mt-10 text-left"><WaitlistForm /></div>
+        </div>
+      </section>
+
+      <SiteFooter />
     </div>
   );
 }

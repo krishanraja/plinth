@@ -9,38 +9,321 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TakedownRouteImport } from './routes/takedown'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as DocsRouteImport } from './routes/docs'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DocsIndexRouteImport } from './routes/docs.index'
+import { Route as DocsQuickstartRouteImport } from './routes/docs.quickstart'
+import { Route as DocsMcpRouteImport } from './routes/docs.mcp'
+import { Route as DocsErrorsRouteImport } from './routes/docs.errors'
+import { Route as ApiMcpRouteImport } from './routes/api/mcp'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
+import { Route as DocsApiResolveProductRouteImport } from './routes/docs.api.resolve-product'
+import { Route as DocsApiReadProductRouteImport } from './routes/docs.api.read-product'
+import { Route as ApiV1Resolve_productRouteImport } from './routes/api/v1/resolve_product'
+import { Route as ApiV1Read_productRouteImport } from './routes/api/v1/read_product'
+import { Route as AuthenticatedDashboardWebhooksRouteImport } from './routes/_authenticated/dashboard.webhooks'
+import { Route as AuthenticatedDashboardUsageRouteImport } from './routes/_authenticated/dashboard.usage'
+import { Route as AuthenticatedDashboardKeysRouteImport } from './routes/_authenticated/dashboard.keys'
+import { Route as AuthenticatedDashboardBillingRouteImport } from './routes/_authenticated/dashboard.billing'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TakedownRoute = TakedownRouteImport.update({
+  id: '/takedown',
+  path: '/takedown',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsQuickstartRoute = DocsQuickstartRouteImport.update({
+  id: '/quickstart',
+  path: '/quickstart',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsMcpRoute = DocsMcpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsErrorsRoute = DocsErrorsRouteImport.update({
+  id: '/errors',
+  path: '/errors',
+  getParentRoute: () => DocsRoute,
+} as any)
+const ApiMcpRoute = ApiMcpRouteImport.update({
+  id: '/api/mcp',
+  path: '/api/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardIndexRoute =
+  AuthenticatedDashboardIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const DocsApiResolveProductRoute = DocsApiResolveProductRouteImport.update({
+  id: '/api/resolve-product',
+  path: '/api/resolve-product',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsApiReadProductRoute = DocsApiReadProductRouteImport.update({
+  id: '/api/read-product',
+  path: '/api/read-product',
+  getParentRoute: () => DocsRoute,
+} as any)
+const ApiV1Resolve_productRoute = ApiV1Resolve_productRouteImport.update({
+  id: '/api/v1/resolve_product',
+  path: '/api/v1/resolve_product',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1Read_productRoute = ApiV1Read_productRouteImport.update({
+  id: '/api/v1/read_product',
+  path: '/api/v1/read_product',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedDashboardWebhooksRoute =
+  AuthenticatedDashboardWebhooksRouteImport.update({
+    id: '/webhooks',
+    path: '/webhooks',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardUsageRoute =
+  AuthenticatedDashboardUsageRouteImport.update({
+    id: '/usage',
+    path: '/usage',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardKeysRoute =
+  AuthenticatedDashboardKeysRouteImport.update({
+    id: '/keys',
+    path: '/keys',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardBillingRoute =
+  AuthenticatedDashboardBillingRouteImport.update({
+    id: '/billing',
+    path: '/billing',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/docs': typeof DocsRouteWithChildren
+  '/privacy': typeof PrivacyRoute
+  '/takedown': typeof TakedownRoute
+  '/terms': typeof TermsRoute
+  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/api/mcp': typeof ApiMcpRoute
+  '/docs/errors': typeof DocsErrorsRoute
+  '/docs/mcp': typeof DocsMcpRoute
+  '/docs/quickstart': typeof DocsQuickstartRoute
+  '/docs/': typeof DocsIndexRoute
+  '/dashboard/billing': typeof AuthenticatedDashboardBillingRoute
+  '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
+  '/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
+  '/dashboard/webhooks': typeof AuthenticatedDashboardWebhooksRoute
+  '/api/v1/read_product': typeof ApiV1Read_productRoute
+  '/api/v1/resolve_product': typeof ApiV1Resolve_productRoute
+  '/docs/api/read-product': typeof DocsApiReadProductRoute
+  '/docs/api/resolve-product': typeof DocsApiResolveProductRoute
+  '/dashboard/': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/takedown': typeof TakedownRoute
+  '/terms': typeof TermsRoute
+  '/api/mcp': typeof ApiMcpRoute
+  '/docs/errors': typeof DocsErrorsRoute
+  '/docs/mcp': typeof DocsMcpRoute
+  '/docs/quickstart': typeof DocsQuickstartRoute
+  '/docs': typeof DocsIndexRoute
+  '/dashboard/billing': typeof AuthenticatedDashboardBillingRoute
+  '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
+  '/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
+  '/dashboard/webhooks': typeof AuthenticatedDashboardWebhooksRoute
+  '/api/v1/read_product': typeof ApiV1Read_productRoute
+  '/api/v1/resolve_product': typeof ApiV1Resolve_productRoute
+  '/docs/api/read-product': typeof DocsApiReadProductRoute
+  '/docs/api/resolve-product': typeof DocsApiResolveProductRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/docs': typeof DocsRouteWithChildren
+  '/privacy': typeof PrivacyRoute
+  '/takedown': typeof TakedownRoute
+  '/terms': typeof TermsRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/api/mcp': typeof ApiMcpRoute
+  '/docs/errors': typeof DocsErrorsRoute
+  '/docs/mcp': typeof DocsMcpRoute
+  '/docs/quickstart': typeof DocsQuickstartRoute
+  '/docs/': typeof DocsIndexRoute
+  '/_authenticated/dashboard/billing': typeof AuthenticatedDashboardBillingRoute
+  '/_authenticated/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
+  '/_authenticated/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
+  '/_authenticated/dashboard/webhooks': typeof AuthenticatedDashboardWebhooksRoute
+  '/api/v1/read_product': typeof ApiV1Read_productRoute
+  '/api/v1/resolve_product': typeof ApiV1Resolve_productRoute
+  '/docs/api/read-product': typeof DocsApiReadProductRoute
+  '/docs/api/resolve-product': typeof DocsApiResolveProductRoute
+  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/docs'
+    | '/privacy'
+    | '/takedown'
+    | '/terms'
+    | '/dashboard'
+    | '/api/mcp'
+    | '/docs/errors'
+    | '/docs/mcp'
+    | '/docs/quickstart'
+    | '/docs/'
+    | '/dashboard/billing'
+    | '/dashboard/keys'
+    | '/dashboard/usage'
+    | '/dashboard/webhooks'
+    | '/api/v1/read_product'
+    | '/api/v1/resolve_product'
+    | '/docs/api/read-product'
+    | '/docs/api/resolve-product'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/privacy'
+    | '/takedown'
+    | '/terms'
+    | '/api/mcp'
+    | '/docs/errors'
+    | '/docs/mcp'
+    | '/docs/quickstart'
+    | '/docs'
+    | '/dashboard/billing'
+    | '/dashboard/keys'
+    | '/dashboard/usage'
+    | '/dashboard/webhooks'
+    | '/api/v1/read_product'
+    | '/api/v1/resolve_product'
+    | '/docs/api/read-product'
+    | '/docs/api/resolve-product'
+    | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/docs'
+    | '/privacy'
+    | '/takedown'
+    | '/terms'
+    | '/_authenticated/dashboard'
+    | '/api/mcp'
+    | '/docs/errors'
+    | '/docs/mcp'
+    | '/docs/quickstart'
+    | '/docs/'
+    | '/_authenticated/dashboard/billing'
+    | '/_authenticated/dashboard/keys'
+    | '/_authenticated/dashboard/usage'
+    | '/_authenticated/dashboard/webhooks'
+    | '/api/v1/read_product'
+    | '/api/v1/resolve_product'
+    | '/docs/api/read-product'
+    | '/docs/api/resolve-product'
+    | '/_authenticated/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  DocsRoute: typeof DocsRouteWithChildren
+  PrivacyRoute: typeof PrivacyRoute
+  TakedownRoute: typeof TakedownRoute
+  TermsRoute: typeof TermsRoute
+  ApiMcpRoute: typeof ApiMcpRoute
+  ApiV1Read_productRoute: typeof ApiV1Read_productRoute
+  ApiV1Resolve_productRoute: typeof ApiV1Resolve_productRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/takedown': {
+      id: '/takedown'
+      path: '/takedown'
+      fullPath: '/takedown'
+      preLoaderRoute: typeof TakedownRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +331,177 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs/': {
+      id: '/docs/'
+      path: '/'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/quickstart': {
+      id: '/docs/quickstart'
+      path: '/quickstart'
+      fullPath: '/docs/quickstart'
+      preLoaderRoute: typeof DocsQuickstartRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/mcp': {
+      id: '/docs/mcp'
+      path: '/mcp'
+      fullPath: '/docs/mcp'
+      preLoaderRoute: typeof DocsMcpRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/errors': {
+      id: '/docs/errors'
+      path: '/errors'
+      fullPath: '/docs/errors'
+      preLoaderRoute: typeof DocsErrorsRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/api/mcp': {
+      id: '/api/mcp'
+      path: '/api/mcp'
+      fullPath: '/api/mcp'
+      preLoaderRoute: typeof ApiMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/': {
+      id: '/_authenticated/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/docs/api/resolve-product': {
+      id: '/docs/api/resolve-product'
+      path: '/api/resolve-product'
+      fullPath: '/docs/api/resolve-product'
+      preLoaderRoute: typeof DocsApiResolveProductRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/api/read-product': {
+      id: '/docs/api/read-product'
+      path: '/api/read-product'
+      fullPath: '/docs/api/read-product'
+      preLoaderRoute: typeof DocsApiReadProductRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/api/v1/resolve_product': {
+      id: '/api/v1/resolve_product'
+      path: '/api/v1/resolve_product'
+      fullPath: '/api/v1/resolve_product'
+      preLoaderRoute: typeof ApiV1Resolve_productRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/read_product': {
+      id: '/api/v1/read_product'
+      path: '/api/v1/read_product'
+      fullPath: '/api/v1/read_product'
+      preLoaderRoute: typeof ApiV1Read_productRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/dashboard/webhooks': {
+      id: '/_authenticated/dashboard/webhooks'
+      path: '/webhooks'
+      fullPath: '/dashboard/webhooks'
+      preLoaderRoute: typeof AuthenticatedDashboardWebhooksRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/usage': {
+      id: '/_authenticated/dashboard/usage'
+      path: '/usage'
+      fullPath: '/dashboard/usage'
+      preLoaderRoute: typeof AuthenticatedDashboardUsageRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/keys': {
+      id: '/_authenticated/dashboard/keys'
+      path: '/keys'
+      fullPath: '/dashboard/keys'
+      preLoaderRoute: typeof AuthenticatedDashboardKeysRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/billing': {
+      id: '/_authenticated/dashboard/billing'
+      path: '/billing'
+      fullPath: '/dashboard/billing'
+      preLoaderRoute: typeof AuthenticatedDashboardBillingRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
   }
 }
 
+interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardBillingRoute: typeof AuthenticatedDashboardBillingRoute
+  AuthenticatedDashboardKeysRoute: typeof AuthenticatedDashboardKeysRoute
+  AuthenticatedDashboardUsageRoute: typeof AuthenticatedDashboardUsageRoute
+  AuthenticatedDashboardWebhooksRoute: typeof AuthenticatedDashboardWebhooksRoute
+  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+}
+
+const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
+  {
+    AuthenticatedDashboardBillingRoute: AuthenticatedDashboardBillingRoute,
+    AuthenticatedDashboardKeysRoute: AuthenticatedDashboardKeysRoute,
+    AuthenticatedDashboardUsageRoute: AuthenticatedDashboardUsageRoute,
+    AuthenticatedDashboardWebhooksRoute: AuthenticatedDashboardWebhooksRoute,
+    AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  }
+
+const AuthenticatedDashboardRouteWithChildren =
+  AuthenticatedDashboardRoute._addFileChildren(
+    AuthenticatedDashboardRouteChildren,
+  )
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+interface DocsRouteChildren {
+  DocsErrorsRoute: typeof DocsErrorsRoute
+  DocsMcpRoute: typeof DocsMcpRoute
+  DocsQuickstartRoute: typeof DocsQuickstartRoute
+  DocsIndexRoute: typeof DocsIndexRoute
+  DocsApiReadProductRoute: typeof DocsApiReadProductRoute
+  DocsApiResolveProductRoute: typeof DocsApiResolveProductRoute
+}
+
+const DocsRouteChildren: DocsRouteChildren = {
+  DocsErrorsRoute: DocsErrorsRoute,
+  DocsMcpRoute: DocsMcpRoute,
+  DocsQuickstartRoute: DocsQuickstartRoute,
+  DocsIndexRoute: DocsIndexRoute,
+  DocsApiReadProductRoute: DocsApiReadProductRoute,
+  DocsApiResolveProductRoute: DocsApiResolveProductRoute,
+}
+
+const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  DocsRoute: DocsRouteWithChildren,
+  PrivacyRoute: PrivacyRoute,
+  TakedownRoute: TakedownRoute,
+  TermsRoute: TermsRoute,
+  ApiMcpRoute: ApiMcpRoute,
+  ApiV1Read_productRoute: ApiV1Read_productRoute,
+  ApiV1Resolve_productRoute: ApiV1Resolve_productRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
