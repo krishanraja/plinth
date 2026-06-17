@@ -1,3 +1,7 @@
+-- Plinth core schema, hardened. Applied to cgkcplcamsijghalintq via the Supabase Management API.
+--  (1) plans.overage_cents_per_call is NUMERIC(8,4) so fractional-cent overage (growth $0.005 = 0.5c) stores instead of rounding to 0.
+--  (2) api_keys: key_hash is never readable by end users (column-level SELECT grant in the security migration); key lifecycle is service-role-only.
+--  (3) audit_log (7-year compliance trail) and (4) webhook_deliveries added (documented but previously missing).
 
 -- =============== ROLES + PROFILES ===============
 CREATE TYPE public.app_role AS ENUM ('admin', 'user');
@@ -41,7 +45,6 @@ CREATE POLICY "Admins read all profiles" ON public.profiles FOR SELECT TO authen
 CREATE POLICY "Admins update all profiles" ON public.profiles FOR UPDATE TO authenticated USING (public.has_role(auth.uid(), 'admin')) WITH CHECK (true);
 CREATE POLICY "Admins read all roles" ON public.user_roles FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
 
--- Trigger to provision profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
@@ -56,7 +59,6 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- =============== TIMESTAMPS HELPER ===============
 CREATE OR REPLACE FUNCTION public.touch_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN NEW.updated_at = now(); RETURN NEW; END;
@@ -88,7 +90,7 @@ CREATE TABLE public.plans (
   name TEXT NOT NULL,
   price_cents INT NOT NULL DEFAULT 0,
   included_calls INT NOT NULL DEFAULT 0,
-  overage_cents_per_call INT NOT NULL DEFAULT 0,
+  overage_cents_per_call NUMERIC(8,4) NOT NULL DEFAULT 0,
   rate_per_sec INT NOT NULL DEFAULT 1,
   burst_per_sec INT NOT NULL DEFAULT 10,
   stripe_price_id TEXT,
@@ -104,9 +106,9 @@ CREATE POLICY "Anyone reads active plans" ON public.plans FOR SELECT TO anon, au
 CREATE POLICY "Admins manage plans" ON public.plans FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin')) WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
 INSERT INTO public.plans (id, name, price_cents, included_calls, overage_cents_per_call, rate_per_sec, burst_per_sec, sort_order, features) VALUES
-  ('free',    'Free',    0,      1000,  2, 1,  10,  0, '["1,000 calls included","Card required","Email support"]'::jsonb),
-  ('starter', 'Starter', 2900,   5000,  1, 10, 50,  1, '["5,000 calls included","$0.01 per overage call","Priority email"]'::jsonb),
-  ('growth',  'Growth',  19900,  50000, 0.5::int, 50, 200, 2, '["50,000 calls included","$0.005 per overage call","SLA + Slack"]'::jsonb);
+  ('free',    'Free',    0,      1000,  2,   1,  10,  0, '["1,000 calls included","Card required","Email support"]'::jsonb),
+  ('starter', 'Starter', 2900,   5000,  1,   10, 50,  1, '["5,000 calls included","$0.01 per overage call","Priority email"]'::jsonb),
+  ('growth',  'Growth',  19900,  50000, 0.5, 50, 200, 2, '["50,000 calls included","$0.005 per overage call","SLA + Slack"]'::jsonb);
 
 CREATE TABLE public.subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -142,12 +144,10 @@ CREATE TABLE public.api_keys (
 );
 CREATE INDEX idx_api_keys_user ON public.api_keys(user_id);
 CREATE INDEX idx_api_keys_hash ON public.api_keys(key_hash);
-GRANT SELECT, INSERT, UPDATE ON public.api_keys TO authenticated;
+GRANT SELECT (id, user_id, name, prefix, last_four, last_used_at, revoked_at, created_at) ON public.api_keys TO authenticated;
 GRANT ALL ON public.api_keys TO service_role;
 ALTER TABLE public.api_keys ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users read own keys" ON public.api_keys FOR SELECT TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "Users create own keys" ON public.api_keys FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users update own keys" ON public.api_keys FOR UPDATE TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- =============== USAGE EVENTS ===============
 CREATE TABLE public.usage_events (
@@ -230,6 +230,29 @@ GRANT ALL ON public.webhooks TO service_role;
 ALTER TABLE public.webhooks ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users manage own webhooks" ON public.webhooks FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
+-- =============== WEBHOOK DELIVERIES ===============
+CREATE TABLE public.webhook_deliveries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  webhook_id UUID NOT NULL REFERENCES public.webhooks(id) ON DELETE CASCADE,
+  event TEXT NOT NULL,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  attempt INT NOT NULL DEFAULT 0,
+  status_code INT,
+  success BOOLEAN NOT NULL DEFAULT false,
+  next_retry_at TIMESTAMPTZ,
+  delivered_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_wh_deliveries_webhook ON public.webhook_deliveries(webhook_id, created_at DESC);
+CREATE INDEX idx_wh_deliveries_retry ON public.webhook_deliveries(next_retry_at) WHERE success = false;
+GRANT SELECT ON public.webhook_deliveries TO authenticated;
+GRANT ALL ON public.webhook_deliveries TO service_role;
+ALTER TABLE public.webhook_deliveries ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users read own webhook deliveries" ON public.webhook_deliveries FOR SELECT TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.webhooks w WHERE w.id = webhook_id AND w.user_id = auth.uid()));
+CREATE POLICY "Admins read all webhook deliveries" ON public.webhook_deliveries FOR SELECT TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'));
+
 -- =============== TAKEDOWN REQUESTS ===============
 CREATE TABLE public.takedown_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -267,7 +290,22 @@ ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users read own invoices" ON public.invoices FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "Admins read all invoices" ON public.invoices FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
 
--- =============== USAGE AGG VIEW ===============
+-- =============== AUDIT LOG (7-year compliance trail) ===============
+CREATE TABLE public.audit_log (
+  id BIGSERIAL PRIMARY KEY,
+  actor UUID,
+  action TEXT NOT NULL,
+  target TEXT,
+  meta JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_audit_created ON public.audit_log(created_at DESC);
+GRANT SELECT ON public.audit_log TO authenticated;
+GRANT ALL ON public.audit_log TO service_role;
+ALTER TABLE public.audit_log ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admins read audit log" ON public.audit_log FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+
+-- =============== USAGE AGG FN ===============
 CREATE OR REPLACE FUNCTION public.usage_current_period(_user_id UUID)
 RETURNS TABLE(calls BIGINT, cost_usd NUMERIC, cached_calls BIGINT, live_calls BIGINT)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
