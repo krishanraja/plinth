@@ -15,8 +15,8 @@ to one, ship to the other in the same release.
 
 | Tool              | Status   | Sync/Async | Notes                                                  |
 | ----------------- | -------- | ---------- | ------------------------------------------------------ |
-| `read_product`    | shipping | sync       | Body must contain `url` or `gtin`. Never both.         |
-| `resolve_product` | shipping | async      | Returns `id` + `pending`. Result via poll or webhook.  |
+| `read_product`    | stub     | sync       | Body must contain `url` or `gtin`. Never both. Returns 503 until the worker is wired (Phase 1). |
+| `resolve_product` | stub     | async      | Returns `id` + `pending`. Result via poll or webhook. Returns 503 until the worker is wired (Phase 1). |
 | `compare_products`| deferred | sync       | N references → matrix of deltas.                       |
 | `brief_product`   | deferred | sync       | Product + 200-word agent-readable read.                |
 
