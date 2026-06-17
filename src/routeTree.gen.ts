@@ -16,6 +16,8 @@ import { Route as DocsRouteImport } from './routes/docs'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
+import { Route as DocsWebhooksRouteImport } from './routes/docs.webhooks'
+import { Route as DocsRateLimitsRouteImport } from './routes/docs.rate-limits'
 import { Route as DocsQuickstartRouteImport } from './routes/docs.quickstart'
 import { Route as DocsMcpRouteImport } from './routes/docs.mcp'
 import { Route as DocsErrorsRouteImport } from './routes/docs.errors'
@@ -63,6 +65,16 @@ const IndexRoute = IndexRouteImport.update({
 const DocsIndexRoute = DocsIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsWebhooksRoute = DocsWebhooksRouteImport.update({
+  id: '/webhooks',
+  path: '/webhooks',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsRateLimitsRoute = DocsRateLimitsRouteImport.update({
+  id: '/rate-limits',
+  path: '/rate-limits',
   getParentRoute: () => DocsRoute,
 } as any)
 const DocsQuickstartRoute = DocsQuickstartRouteImport.update({
@@ -152,6 +164,8 @@ export interface FileRoutesByFullPath {
   '/docs/errors': typeof DocsErrorsRoute
   '/docs/mcp': typeof DocsMcpRoute
   '/docs/quickstart': typeof DocsQuickstartRoute
+  '/docs/rate-limits': typeof DocsRateLimitsRoute
+  '/docs/webhooks': typeof DocsWebhooksRoute
   '/docs/': typeof DocsIndexRoute
   '/dashboard/billing': typeof AuthenticatedDashboardBillingRoute
   '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
@@ -172,6 +186,8 @@ export interface FileRoutesByTo {
   '/docs/errors': typeof DocsErrorsRoute
   '/docs/mcp': typeof DocsMcpRoute
   '/docs/quickstart': typeof DocsQuickstartRoute
+  '/docs/rate-limits': typeof DocsRateLimitsRoute
+  '/docs/webhooks': typeof DocsWebhooksRoute
   '/docs': typeof DocsIndexRoute
   '/dashboard/billing': typeof AuthenticatedDashboardBillingRoute
   '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
@@ -196,6 +212,8 @@ export interface FileRoutesById {
   '/docs/errors': typeof DocsErrorsRoute
   '/docs/mcp': typeof DocsMcpRoute
   '/docs/quickstart': typeof DocsQuickstartRoute
+  '/docs/rate-limits': typeof DocsRateLimitsRoute
+  '/docs/webhooks': typeof DocsWebhooksRoute
   '/docs/': typeof DocsIndexRoute
   '/_authenticated/dashboard/billing': typeof AuthenticatedDashboardBillingRoute
   '/_authenticated/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
@@ -220,6 +238,8 @@ export interface FileRouteTypes {
     | '/docs/errors'
     | '/docs/mcp'
     | '/docs/quickstart'
+    | '/docs/rate-limits'
+    | '/docs/webhooks'
     | '/docs/'
     | '/dashboard/billing'
     | '/dashboard/keys'
@@ -240,6 +260,8 @@ export interface FileRouteTypes {
     | '/docs/errors'
     | '/docs/mcp'
     | '/docs/quickstart'
+    | '/docs/rate-limits'
+    | '/docs/webhooks'
     | '/docs'
     | '/dashboard/billing'
     | '/dashboard/keys'
@@ -263,6 +285,8 @@ export interface FileRouteTypes {
     | '/docs/errors'
     | '/docs/mcp'
     | '/docs/quickstart'
+    | '/docs/rate-limits'
+    | '/docs/webhooks'
     | '/docs/'
     | '/_authenticated/dashboard/billing'
     | '/_authenticated/dashboard/keys'
@@ -336,6 +360,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/docs/'
       preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/webhooks': {
+      id: '/docs/webhooks'
+      path: '/webhooks'
+      fullPath: '/docs/webhooks'
+      preLoaderRoute: typeof DocsWebhooksRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/rate-limits': {
+      id: '/docs/rate-limits'
+      path: '/rate-limits'
+      fullPath: '/docs/rate-limits'
+      preLoaderRoute: typeof DocsRateLimitsRouteImport
       parentRoute: typeof DocsRoute
     }
     '/docs/quickstart': {
@@ -476,6 +514,8 @@ interface DocsRouteChildren {
   DocsErrorsRoute: typeof DocsErrorsRoute
   DocsMcpRoute: typeof DocsMcpRoute
   DocsQuickstartRoute: typeof DocsQuickstartRoute
+  DocsRateLimitsRoute: typeof DocsRateLimitsRoute
+  DocsWebhooksRoute: typeof DocsWebhooksRoute
   DocsIndexRoute: typeof DocsIndexRoute
   DocsApiReadProductRoute: typeof DocsApiReadProductRoute
   DocsApiResolveProductRoute: typeof DocsApiResolveProductRoute
@@ -485,6 +525,8 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsErrorsRoute: DocsErrorsRoute,
   DocsMcpRoute: DocsMcpRoute,
   DocsQuickstartRoute: DocsQuickstartRoute,
+  DocsRateLimitsRoute: DocsRateLimitsRoute,
+  DocsWebhooksRoute: DocsWebhooksRoute,
   DocsIndexRoute: DocsIndexRoute,
   DocsApiReadProductRoute: DocsApiReadProductRoute,
   DocsApiResolveProductRoute: DocsApiResolveProductRoute,
