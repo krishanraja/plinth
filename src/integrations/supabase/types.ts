@@ -50,6 +50,33 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_log: {
+        Row: {
+          action: string
+          actor: string | null
+          created_at: string
+          id: number
+          meta: Json
+          target: string | null
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          created_at?: string
+          id?: number
+          meta?: Json
+          target?: string | null
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          created_at?: string
+          id?: number
+          meta?: Json
+          target?: string | null
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount_cents: number
@@ -443,6 +470,53 @@ export type Database = {
           use_case?: string | null
         }
         Relationships: []
+      }
+      webhook_deliveries: {
+        Row: {
+          attempt: number
+          created_at: string
+          delivered_at: string | null
+          event: string
+          id: string
+          next_retry_at: string | null
+          payload: Json
+          status_code: number | null
+          success: boolean
+          webhook_id: string
+        }
+        Insert: {
+          attempt?: number
+          created_at?: string
+          delivered_at?: string | null
+          event: string
+          id?: string
+          next_retry_at?: string | null
+          payload?: Json
+          status_code?: number | null
+          success?: boolean
+          webhook_id: string
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          delivered_at?: string | null
+          event?: string
+          id?: string
+          next_retry_at?: string | null
+          payload?: Json
+          status_code?: number | null
+          success?: boolean
+          webhook_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_webhook_id_fkey"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "webhooks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       webhooks: {
         Row: {
