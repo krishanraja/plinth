@@ -22,7 +22,7 @@ export const Route = createFileRoute("/api/mcp")({
             headers: { "content-type": "application/json" },
           });
         }
-        // Stub MCP response — full mcp-tanstack-start wiring lands with tool execution.
+        // Stub MCP response. Full mcp-tanstack-start wiring lands with tool execution.
         return new Response(
           JSON.stringify({
             jsonrpc: "2.0",

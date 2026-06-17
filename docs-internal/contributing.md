@@ -44,7 +44,7 @@ focused commits via the platform.
 - [ ] Logo, favicon, OG image still render (smoke check at `/`).
 - [ ] Any new wedge / table / surface is reflected in the matching
       `docs-internal/*.md`.
-- [ ] `mem://index.md` updated if a load-bearing rule changed.
+- [ ] `docs-internal/README.md` updated if a load-bearing rule changed.
 
 ## Asking the user
 

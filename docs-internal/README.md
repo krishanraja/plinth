@@ -19,7 +19,7 @@ human signup.
 4. **Price as a band, not a number.** `{ low, high, currency, as_of, n_sources }`. We refuse to pretend a single scraped number is the truth.
 5. **One typed schema across URL, GTIN, and fuzzy name.** Most stacks compose 2 to 3 vendors to cover these three lookup modes.
 
-If you change any of these, update this file AND `docs-internal/product.md` AND `mem://index.md`.
+If you change any of these, update this file AND `docs-internal/product.md`.
 
 ## Routing table
 
@@ -46,10 +46,10 @@ Customer-facing docs live at `/docs/*` (file routes under `src/routes/docs.*.tsx
 Internal docs (this directory) carry the "why" and the things we will never
 put on a marketing page.
 
-## Memory
+## Keeping docs in sync
 
-Project rules also live at `mem://index.md`. When you change a load-bearing
-rule here (or in any role doc), update `mem://index.md` in the same pass.
+This README is the load-bearing index. When you change a load-bearing
+rule here (or in any role doc), update this README in the same pass.
 
 ---
-Last reviewed: 2026-06-17. If this is wrong, fix it and update `mem://index.md`.
+Last reviewed: 2026-06-17. If this is wrong, fix it and update the affected role doc.
