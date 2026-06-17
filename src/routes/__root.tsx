@@ -13,6 +13,8 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
+import favicon from "@/assets/favicon.png.asset.json";
+import ogImage from "@/assets/og-image.png.asset.json";
 
 function NotFoundComponent() {
   return (
@@ -79,23 +81,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Plinth — Product data for agents" },
+      { title: "Plinth · Product data for agents" },
       {
         name: "description",
         content:
-          "One call turns a URL, a barcode, or a fuzzy name into a typed product object — sourced, confidence-scored, and cost-stamped.",
+          "Typed product object from a URL, a barcode, or a fuzzy name. Confidence per field, cost stamped in the response. REST and MCP, payable by an agent.",
       },
-      { property: "og:title", content: "Plinth — Product data for agents" },
+      { property: "og:title", content: "Plinth · Product data for agents" },
       {
         property: "og:description",
         content:
           "Agents can decide what to buy. Reading the product page is where they still break. Plinth reads it for them.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Plinth" },
+      { property: "og:image", content: ogImage.url },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: ogImage.url },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/png", href: favicon.url },
+      { rel: "apple-touch-icon", sizes: "180x180", href: favicon.url },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

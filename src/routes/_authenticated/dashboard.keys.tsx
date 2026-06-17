@@ -9,5 +9,5 @@ const Stub = (title: string, body: string) => () => (
   </div>
 );
 export const Route = createFileRoute("/_authenticated/dashboard/keys")({
-  component: Stub("API keys", "Create, rotate, and revoke your single secret key (plk_…). Shown once at creation — store it safely."),
+  component: Stub("API keys", "Create, rotate, and revoke your single secret key (plk_…). Shown once at creation. Store it safely."),
 });

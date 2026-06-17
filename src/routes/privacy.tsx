@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 export const Route = createFileRoute("/privacy")({
-  head: () => ({ meta: [{ title: "Privacy — Plinth" }] }),
+  head: () => ({ meta: [{ title: "Privacy · Plinth" }] }),
   component: () => (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
