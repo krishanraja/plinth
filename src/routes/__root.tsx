@@ -13,8 +13,6 @@ import appCss from "../styles.css?url";
 import { reportError } from "../lib/error-reporting";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
-import favicon from "@/assets/favicon.png.asset.json";
-import ogImage from "@/assets/og-image.png.asset.json";
 
 function NotFoundComponent() {
   return (
@@ -95,14 +93,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Plinth" },
-      { property: "og:image", content: ogImage.url },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: ogImage.url },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/png", href: favicon.url },
-      { rel: "apple-touch-icon", sizes: "180x180", href: favicon.url },
+      { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon.png" },
+      { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon.png" },
+      { rel: "shortcut icon", href: "/favicon.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
