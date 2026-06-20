@@ -35,6 +35,17 @@ export const Route = createFileRoute("/api/v1/read_product")({
           );
         }
 
+        // Per-plan rate limit (60s window).
+        const { rateCheck, rateHeaders } = await import("@/integrations/supabase/rate-limit.server");
+        const rl = await rateCheck(principal.userId);
+        const rlh = rateHeaders(rl);
+        if (!rl.allowed) {
+          return new Response(
+            JSON.stringify({ error: "rate_limited", message: "Rate limit exceeded. Slow down or upgrade your plan." }),
+            { status: 429, headers: { ...rlh, "retry-after": String(rl.reset), "content-type": "application/json" } },
+          );
+        }
+
         let body: unknown;
         try {
           body = await request.json();
@@ -105,7 +116,7 @@ export const Route = createFileRoute("/api/v1/read_product")({
           /* metering best-effort */
         }
 
-        return new Response(text, { status, headers: { "content-type": "application/json" } });
+        return new Response(text, { status, headers: { ...rlh, "content-type": "application/json" } });
       },
     },
   },

@@ -98,6 +98,25 @@ export const Route = createFileRoute("/api/mcp")({
               );
             }
 
+            // Per-plan rate limit.
+            const { rateCheck } = await import("@/integrations/supabase/rate-limit.server");
+            const rl = await rateCheck(principal.userId);
+            if (!rl.allowed) {
+              return new Response(
+                JSON.stringify({ jsonrpc: "2.0", id: id ?? null, error: { code: -32099, message: "Rate limit exceeded." } }),
+                {
+                  status: 429,
+                  headers: {
+                    "content-type": "application/json",
+                    "retry-after": String(rl.reset),
+                    "x-ratelimit-limit": String(rl.limit),
+                    "x-ratelimit-remaining": String(Math.max(0, rl.limit - rl.used)),
+                    "x-ratelimit-reset": String(rl.reset),
+                  },
+                },
+              );
+            }
+
             const WORKER_URL = process.env.PLINTH_EXTRACTOR_URL;
             const WORKER_TOKEN = process.env.PLINTH_EXTRACTOR_TOKEN;
             if (!WORKER_URL || !WORKER_TOKEN) {
