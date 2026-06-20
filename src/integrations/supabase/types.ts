@@ -566,8 +566,17 @@ export type Database = {
         }
         Returns: boolean
       }
-      usage_current_period: {
+      rate_check: {
         Args: { _user_id: string }
+        Returns: {
+          allowed: boolean
+          lim: number
+          reset_seconds: number
+          used: number
+        }[]
+      }
+      usage_current_period: {
+        Args: { _user_id?: string }
         Returns: {
           cached_calls: number
           calls: number
