@@ -27,9 +27,7 @@ export async function validateApiKey(
     .is("revoked_at", null)
     .maybeSingle();
   if (error || !data) return null;
-  void supabaseAdmin
-    .from("api_keys")
-    .update({ last_used_at: new Date().toISOString() })
-    .eq("id", data.id);
+  // last_used_at is touched alongside the awaited usage write in the caller (serverless
+  // freezes the function after the response, so fire-and-forget writes are lost).
   return { userId: data.user_id, keyId: data.id };
 }

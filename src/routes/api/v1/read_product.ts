@@ -83,16 +83,24 @@ export const Route = createFileRoute("/api/v1/read_product")({
         }
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          void supabaseAdmin.from("usage_events").insert({
-            user_id: principal.userId,
-            api_key_id: principal.keyId,
-            tool: "read_product",
-            endpoint: "/api/v1/read_product",
-            cached,
-            status,
-            cost_usd: cost,
-            latency_ms: Date.now() - started,
-          });
+          // Awaited: serverless freezes the function after the response, so a fire-and-forget
+          // write would be dropped. Meter the call and touch the key's last_used_at together.
+          await Promise.all([
+            supabaseAdmin.from("usage_events").insert({
+              user_id: principal.userId,
+              api_key_id: principal.keyId,
+              tool: "read_product",
+              endpoint: "/api/v1/read_product",
+              cached,
+              status,
+              cost_usd: cost,
+              latency_ms: Date.now() - started,
+            }),
+            supabaseAdmin
+              .from("api_keys")
+              .update({ last_used_at: new Date().toISOString() })
+              .eq("id", principal.keyId),
+          ]);
         } catch {
           /* metering best-effort */
         }
