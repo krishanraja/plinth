@@ -20,6 +20,19 @@ const TOOLS = [
       },
     },
   },
+  {
+    name: "resolve_product",
+    description:
+      "Resolve a fuzzy product name into a typed product object (neural search then extraction). Returns the resolved product and its source URL.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "Fuzzy product name" },
+        min_confidence: { type: "number", description: "Override the 0.7 trust gate (0 to 1)" },
+      },
+      required: ["name"],
+    },
+  },
 ];
 
 function rpc(id: unknown, result: unknown) {
@@ -85,18 +98,33 @@ export const Route = createFileRoute("/api/mcp")({
           case "tools/call": {
             const name = params?.name as string | undefined;
             const args = (params?.arguments ?? {}) as Record<string, unknown>;
-            if (name !== "read_product") {
+            if (name !== "read_product" && name !== "resolve_product") {
               return rpcError(id, -32602, `Unknown tool: ${String(name)}`);
             }
-            const hasUrl = typeof args.url === "string" && (args.url as string).length > 0;
-            const hasGtin = typeof args.gtin === "string" && (args.gtin as string).length > 0;
-            if (hasUrl === hasGtin) {
-              return toolResult(
-                id,
-                JSON.stringify({ error: "invalid_request", message: "Provide exactly one of: url, gtin." }),
-                true,
-              );
+            const payload: Record<string, unknown> = {};
+            if (name === "read_product") {
+              const hasUrl = typeof args.url === "string" && (args.url as string).length > 0;
+              const hasGtin = typeof args.gtin === "string" && (args.gtin as string).length > 0;
+              if (hasUrl === hasGtin) {
+                return toolResult(
+                  id,
+                  JSON.stringify({ error: "invalid_request", message: "Provide exactly one of: url, gtin." }),
+                  true,
+                );
+              }
+              if (hasUrl) payload.url = args.url;
+              if (hasGtin) payload.gtin = args.gtin;
+            } else {
+              if (typeof args.name !== "string" || (args.name as string).trim().length < 2) {
+                return toolResult(
+                  id,
+                  JSON.stringify({ error: "invalid_request", message: "Provide a product name (2+ chars)." }),
+                  true,
+                );
+              }
+              payload.name = (args.name as string).trim();
             }
+            if (typeof args.min_confidence === "number") payload.min_confidence = args.min_confidence;
 
             // Per-plan rate limit.
             const { rateCheck } = await import("@/integrations/supabase/rate-limit.server");
@@ -122,11 +150,6 @@ export const Route = createFileRoute("/api/mcp")({
             if (!WORKER_URL || !WORKER_TOKEN) {
               return toolResult(id, JSON.stringify({ error: "external_worker_not_configured" }), true);
             }
-            const payload: Record<string, unknown> = {};
-            if (hasUrl) payload.url = args.url;
-            if (hasGtin) payload.gtin = args.gtin;
-            if (typeof args.min_confidence === "number") payload.min_confidence = args.min_confidence;
-
             const started = Date.now();
             let text = JSON.stringify({ error: "upstream_unavailable" });
             let status = 502;
@@ -135,7 +158,7 @@ export const Route = createFileRoute("/api/mcp")({
                 method: "POST",
                 headers: { "content-type": "application/json", authorization: `Bearer ${WORKER_TOKEN}` },
                 body: JSON.stringify(payload),
-                signal: AbortSignal.timeout(25000),
+                signal: AbortSignal.timeout(30000),
               });
               text = await res.text();
               status = res.status;
@@ -158,7 +181,7 @@ export const Route = createFileRoute("/api/mcp")({
                 supabaseAdmin.from("usage_events").insert({
                   user_id: principal.userId,
                   api_key_id: principal.keyId,
-                  tool: "read_product",
+                  tool: name,
                   endpoint: "/api/mcp",
                   cached,
                   status,
