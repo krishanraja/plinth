@@ -30,6 +30,7 @@ import { Route as ApiV1Resolve_productRouteImport } from './routes/api/v1/resolv
 import { Route as ApiV1Read_productRouteImport } from './routes/api/v1/read_product'
 import { Route as ApiV1Compare_productsRouteImport } from './routes/api/v1/compare_products'
 import { Route as ApiV1Brief_productRouteImport } from './routes/api/v1/brief_product'
+import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as AuthenticatedDashboardWebhooksRouteImport } from './routes/_authenticated/dashboard.webhooks'
 import { Route as AuthenticatedDashboardUsageRouteImport } from './routes/_authenticated/dashboard.usage'
 import { Route as AuthenticatedDashboardKeysRouteImport } from './routes/_authenticated/dashboard.keys'
@@ -140,6 +141,11 @@ const ApiV1Brief_productRoute = ApiV1Brief_productRouteImport.update({
   path: '/api/v1/brief_product',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
+  id: '/api/stripe/webhook',
+  path: '/api/stripe/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardWebhooksRoute =
   AuthenticatedDashboardWebhooksRouteImport.update({
     id: '/webhooks',
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
   '/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
   '/dashboard/webhooks': typeof AuthenticatedDashboardWebhooksRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/api/v1/brief_product': typeof ApiV1Brief_productRoute
   '/api/v1/compare_products': typeof ApiV1Compare_productsRoute
   '/api/v1/read_product': typeof ApiV1Read_productRoute
@@ -207,6 +214,7 @@ export interface FileRoutesByTo {
   '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
   '/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
   '/dashboard/webhooks': typeof AuthenticatedDashboardWebhooksRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/api/v1/brief_product': typeof ApiV1Brief_productRoute
   '/api/v1/compare_products': typeof ApiV1Compare_productsRoute
   '/api/v1/read_product': typeof ApiV1Read_productRoute
@@ -235,6 +243,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
   '/_authenticated/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
   '/_authenticated/dashboard/webhooks': typeof AuthenticatedDashboardWebhooksRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/api/v1/brief_product': typeof ApiV1Brief_productRoute
   '/api/v1/compare_products': typeof ApiV1Compare_productsRoute
   '/api/v1/read_product': typeof ApiV1Read_productRoute
@@ -263,6 +272,7 @@ export interface FileRouteTypes {
     | '/dashboard/keys'
     | '/dashboard/usage'
     | '/dashboard/webhooks'
+    | '/api/stripe/webhook'
     | '/api/v1/brief_product'
     | '/api/v1/compare_products'
     | '/api/v1/read_product'
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/dashboard/keys'
     | '/dashboard/usage'
     | '/dashboard/webhooks'
+    | '/api/stripe/webhook'
     | '/api/v1/brief_product'
     | '/api/v1/compare_products'
     | '/api/v1/read_product'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/keys'
     | '/_authenticated/dashboard/usage'
     | '/_authenticated/dashboard/webhooks'
+    | '/api/stripe/webhook'
     | '/api/v1/brief_product'
     | '/api/v1/compare_products'
     | '/api/v1/read_product'
@@ -331,6 +343,7 @@ export interface RootRouteChildren {
   TakedownRoute: typeof TakedownRoute
   TermsRoute: typeof TermsRoute
   ApiMcpRoute: typeof ApiMcpRoute
+  ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
   ApiV1Brief_productRoute: typeof ApiV1Brief_productRoute
   ApiV1Compare_productsRoute: typeof ApiV1Compare_productsRoute
   ApiV1Read_productRoute: typeof ApiV1Read_productRoute
@@ -486,6 +499,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1Brief_productRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/stripe/webhook': {
+      id: '/api/stripe/webhook'
+      path: '/api/stripe/webhook'
+      fullPath: '/api/stripe/webhook'
+      preLoaderRoute: typeof ApiStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard/webhooks': {
       id: '/_authenticated/dashboard/webhooks'
       path: '/webhooks'
@@ -582,6 +602,7 @@ const rootRouteChildren: RootRouteChildren = {
   TakedownRoute: TakedownRoute,
   TermsRoute: TermsRoute,
   ApiMcpRoute: ApiMcpRoute,
+  ApiStripeWebhookRoute: ApiStripeWebhookRoute,
   ApiV1Brief_productRoute: ApiV1Brief_productRoute,
   ApiV1Compare_productsRoute: ApiV1Compare_productsRoute,
   ApiV1Read_productRoute: ApiV1Read_productRoute,
