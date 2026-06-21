@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+/* eslint-disable @typescript-eslint/no-explicit-any -- Stripe webhook event payloads are dynamic untyped JSON */
+
 // Stripe webhook. Verifies the signature manually (no SDK), then mirrors subscriptions + invoices.
 
 function verifySignature(payload: string, header: string | null, secret: string): boolean {
