@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: No em dashes in src (house style)
+        run: |
+          if grep -rn "—" src/; then
+            echo "::error::Em dash found in src/. House style: use a period, comma, colon, or 'to' for ranges."
+            exit 1
+          fi
+
+      - name: Typecheck
+        run: bunx tsc --noEmit
+
+      - name: Lint (non-blocking until a prettier-format pass on Lovable-origin files)
+        run: bun run lint
+        continue-on-error: true
+
+      - name: Build
+        run: bun run build
