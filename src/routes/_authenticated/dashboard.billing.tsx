@@ -91,7 +91,7 @@ function BillingPage() {
                 {isCurrent ? (
                   <span className="font-mono text-xs uppercase tracking-widest text-signal">Current plan</span>
                 ) : p.id === "free" ? (
-                  <span className="font-mono text-xs text-muted-foreground">{"—"}</span>
+                  <span className="font-mono text-xs text-muted-foreground">{"·"}</span>
                 ) : (
                   <button
                     onClick={() => upgrade(p.id as "starter" | "growth")}
@@ -135,7 +135,7 @@ function BillingPage() {
                   view
                 </a>
               ) : (
-                <span className="text-muted-foreground">{"—"}</span>
+                <span className="text-muted-foreground">{"·"}</span>
               )}
             </div>
           ))
