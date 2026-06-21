@@ -9,8 +9,13 @@
 | Growth  | `plinth_growth_v1`   | $199          | 50,000         | $0.005   |
 | Custom  | `plinth_custom_*`    | quote         | quote          | quote    |
 
-Free requires a card on file. Overage is auto-billed on the same
-invoice as the subscription line.
+**Status (2026-06-21):** live products and prices exist in Stripe (Starter
+`price_1Tki9C4w6vAdI2o574L46LZW`, Growth `price_1Tki9I4w6vAdI2o5NtBRlfk6`), wired to
+`plans.stripe_price_id`. Checkout, the billing portal, and the signature-verified webhook are live;
+checkout was browser-verified end to end against live Stripe. Subscriptions are flat monthly in v1.
+Usage is metered into `usage_events`, but overage is **not yet auto-billed** to Stripe (metered
+usage reporting is a follow-up); the formula below is the intended model. Free does not require a
+card.
 
 ## Overage formula
 
@@ -24,11 +29,14 @@ rate limits weight calls.
 
 ## x402 settlement
 
-- Per-call, settled to `X402_RECIPIENT` on Base.
-- We do not credit a Stripe account when a customer pays over x402;
-  the two payment paths are independent.
-- For accounting, x402 revenue is reconciled monthly from on-chain
-  events tagged with the call's `request_id`.
+- **Status:** live on **Base Sepolia** (beta), settled per call to `X402_RECIPIENT` via the x402
+  facilitator (verify then settle). The full buyer to facilitator to settle flow is proven; mainnet
+  at GA.
+- Per-call USDC, settled directly to `X402_RECIPIENT`. We do not custody funds.
+- We do not credit a Stripe account when a customer pays over x402; the two payment paths are
+  independent.
+- For accounting, x402 revenue is reconciled from on-chain settlement events (each call's
+  `X-PAYMENT-RESPONSE` carries the tx hash).
 
 ## Invoicing
 
@@ -56,4 +64,4 @@ weekly weighted margin in admin; investigate if it drops below 60%.
 See [support.md](./support.md). Process via Stripe; mirror to `invoices`.
 
 ---
-Last reviewed: 2026-06-17.
+Last reviewed: 2026-06-21.

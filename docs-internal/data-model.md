@@ -16,9 +16,9 @@ update this file in the same change.
 | `api_keys`           | Hashed key (sha256), prefix, label, last_used_at, revoked_at              | Owner read; insert/revoke via server fn                                    |
 | `usage_events`       | Per-call: key_id, tool, cost_usd, cached, latency_ms, created_at          | Owner read; service_role inserts                                           |
 | `product_cache`      | Schema.org Product superset, ttl, confidence, source_method               | Service-role only; never read directly from the client                     |
-| `resolutions`        | Async `resolve_product` runs: status, result_id, confidence               | Owner read; service_role writes                                            |
-| `webhooks`           | Endpoint, secret, events[], status                                        | Owner CRUD                                                                 |
-| `webhook_deliveries` | Attempts, status code, response body excerpt                              | Owner read                                                                 |
+| `resolutions`        | Reserved for an async `resolve_product` job model (resolve is sync in v1)  | Owner read; service_role writes                                            |
+| `webhooks`           | Endpoint, secret, events[], status (reserved; webhooks deferred)           | Owner CRUD                                                                 |
+| `webhook_deliveries` | Attempts, status code, response body excerpt (reserved)                    | Owner read                                                                 |
 | `invoices`           | Stripe invoice mirror for in-app history                                  | Owner read                                                                 |
 | `takedown_requests`  | Email, url, reason, status                                                | Insert open; admin read/triage                                             |
 
@@ -28,6 +28,17 @@ update this file in the same change.
 `profiles`. The `public.has_role(_user_id, _role)` security-definer
 function is the only legitimate way to check role membership. Use it
 in RLS policies and admin gates.
+
+## Functions
+
+- `has_role(_user_id, _role)` security-definer: the only legitimate role check.
+- `usage_current_period()` security-definer: aggregates the caller's current-period usage, deriving
+  the user from `auth.uid()` (no argument, so no cross-account leak).
+- `rate_check(_user_id)` security-definer: 60-second sliding-window count over `usage_events`;
+  returns `{ allowed, used, lim, reset_seconds }`. Budget is `plans.rate_per_sec * 60` per minute.
+
+`plans` carries `rate_per_sec`, `burst_per_sec`, `included_calls`, `overage_cents_per_call`,
+`price_cents`, and `stripe_price_id`. `product_cache` is purged by a `pg_cron` job on TTL.
 
 ## Retention
 
@@ -67,4 +78,4 @@ GTINs). `usage_events` stores the key id and tool, never the request
 body beyond what is needed for the cache.
 
 ---
-Last reviewed: 2026-06-17.
+Last reviewed: 2026-06-21.

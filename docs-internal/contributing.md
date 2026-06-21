@@ -5,8 +5,9 @@ on Plinth.
 
 ## Branching
 
-Lovable manages git internally; do not run stateful git commands. Make
-focused commits via the platform.
+Real git. Never push to `main` directly: branch, open a PR, get green CI, squash-merge, then sync.
+Vercel auto-deploys `main` and builds a preview for every PR. End commit messages with the
+`Co-Authored-By` trailer.
 
 ## Commit style
 
@@ -28,11 +29,11 @@ focused commits via the platform.
 | A docs page                        | `src/routes/docs.<name>.tsx` + sidebar link  |
 | A dashboard page                   | `src/routes/_authenticated/dashboard.<name>.tsx` |
 | A REST endpoint                    | `src/routes/api/v1/<name>.ts`                |
-| A webhook receiver                 | `src/routes/api/public/<name>.ts`            |
-| A client-callable server function  | `src/lib/<area>.functions.ts`                |
-| A server-only helper               | `src/lib/<area>.server.ts`                   |
-| A migration                        | via `supabase--migration` tool               |
-| An image / font / binary asset     | upload via `lovable-assets`, write `.asset.json` |
+| A webhook receiver                 | `src/routes/api/<provider>/<name>.ts` (e.g. `api/stripe/webhook.ts`) |
+| A client-callable server function  | `src/lib/api/<area>.functions.ts`            |
+| A server-only helper               | `src/lib/api/<area>.server.ts` or `src/integrations/...server.ts` |
+| A migration                        | Supabase Management API / MCP, mirror to `supabase/migrations/` |
+| An image / font / binary asset     | `src/assets/` or `public/`                   |
 
 ## Before you ship (checklist)
 
@@ -48,8 +49,8 @@ focused commits via the platform.
 
 ## Asking the user
 
-Use the questions tool when scope or preference is genuinely ambiguous.
-Do not ask about defaults (Lovable Cloud, Lovable AI Gateway).
+Use the questions tool when scope or preference is genuinely ambiguous. Do not ask about settled
+defaults (Vercel hosting, the `cgkc` Supabase project, the standalone extraction worker).
 
 ---
-Last reviewed: 2026-06-17.
+Last reviewed: 2026-06-21.

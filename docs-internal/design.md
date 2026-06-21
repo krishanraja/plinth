@@ -38,9 +38,9 @@ should breathe; never use hardcoded `<br/>`.
 
 The wordmark and "p." mark are CDN assets at:
 
-- `src/assets/plinth-logo.png.asset.json` — wordmark (header/footer)
-- `src/assets/favicon.png.asset.json` — square mark (favicon, apple-touch)
-- `src/assets/og-image.png.asset.json` — 1200×630 social card
+- `src/assets/plinth-logo.png.asset.json`: wordmark (header/footer)
+- `src/assets/favicon.png.asset.json`: square mark (favicon, apple-touch)
+- `src/assets/og-image.png.asset.json`: 1200×630 social card
 
 Header logo height: 28px. Footer logo height: 24px. Never recolour the
 logo in CSS; if a new tint is needed, upload a new asset.

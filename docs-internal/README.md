@@ -11,6 +11,12 @@ confidence, the per-call cost stamped in the response, and an MCP +
 x402 surface so an autonomous agent can discover and pay for it without
 human signup.
 
+**Status (2026-06-21): live and in private beta.** All four tools, key
+auth, metering, rate limiting, the dashboard, Stripe billing, and x402
+settlement on Base Sepolia are deployed. App at https://plinth-tan.vercel.app
+(custom domain `onplinth.io` provisioning). The developer-facing front door
+is the repo-root [README.md](../README.md).
+
 ## The five wedges (memorise these)
 
 1. **MCP-native + x402 micropayments.** Diffbot, Zyte, Bright Data, Firecrawl all require an account and an API key. We expose the same tools over MCP and accept USDC on Base per call.
@@ -42,9 +48,10 @@ If you change any of these, update this file AND `docs-internal/product.md`.
 
 ## Public docs
 
-Customer-facing docs live at `/docs/*` (file routes under `src/routes/docs.*.tsx`).
-Internal docs (this directory) carry the "why" and the things we will never
-put on a marketing page.
+The repo-root [README.md](../README.md) is the developer front door (quickstart, tools, auth).
+Customer-facing docs live at `/docs/*` (file routes under `src/routes/docs.*.tsx`). The
+North Star and stop conditions are in [../docs/KILL-CRITERIA.md](../docs/KILL-CRITERIA.md).
+Internal docs (this directory) carry the "why" and the things we will never put on a marketing page.
 
 ## Keeping docs in sync
 
@@ -52,4 +59,4 @@ This README is the load-bearing index. When you change a load-bearing
 rule here (or in any role doc), update this README in the same pass.
 
 ---
-Last reviewed: 2026-06-17. If this is wrong, fix it and update the affected role doc.
+Last reviewed: 2026-06-21. If this is wrong, fix it and update the affected role doc.
