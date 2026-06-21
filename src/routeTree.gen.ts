@@ -22,6 +22,7 @@ import { Route as DocsQuickstartRouteImport } from './routes/docs.quickstart'
 import { Route as DocsMcpRouteImport } from './routes/docs.mcp'
 import { Route as DocsErrorsRouteImport } from './routes/docs.errors'
 import { Route as ApiMcpRouteImport } from './routes/api/mcp'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as DocsApiResolveProductRouteImport } from './routes/docs.api.resolve-product'
@@ -98,6 +99,11 @@ const DocsErrorsRoute = DocsErrorsRouteImport.update({
 const ApiMcpRoute = ApiMcpRouteImport.update({
   id: '/api/mcp',
   path: '/api/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/takedown': typeof TakedownRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/api/health': typeof ApiHealthRoute
   '/api/mcp': typeof ApiMcpRoute
   '/docs/errors': typeof DocsErrorsRoute
   '/docs/mcp': typeof DocsMcpRoute
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/takedown': typeof TakedownRoute
   '/terms': typeof TermsRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/mcp': typeof ApiMcpRoute
   '/docs/errors': typeof DocsErrorsRoute
   '/docs/mcp': typeof DocsMcpRoute
@@ -232,6 +240,7 @@ export interface FileRoutesById {
   '/takedown': typeof TakedownRoute
   '/terms': typeof TermsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/api/health': typeof ApiHealthRoute
   '/api/mcp': typeof ApiMcpRoute
   '/docs/errors': typeof DocsErrorsRoute
   '/docs/mcp': typeof DocsMcpRoute
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/takedown'
     | '/terms'
     | '/dashboard'
+    | '/api/health'
     | '/api/mcp'
     | '/docs/errors'
     | '/docs/mcp'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/takedown'
     | '/terms'
+    | '/api/health'
     | '/api/mcp'
     | '/docs/errors'
     | '/docs/mcp'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '/takedown'
     | '/terms'
     | '/_authenticated/dashboard'
+    | '/api/health'
     | '/api/mcp'
     | '/docs/errors'
     | '/docs/mcp'
@@ -342,6 +354,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   TakedownRoute: typeof TakedownRoute
   TermsRoute: typeof TermsRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   ApiMcpRoute: typeof ApiMcpRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
   ApiV1Brief_productRoute: typeof ApiV1Brief_productRoute
@@ -441,6 +454,13 @@ declare module '@tanstack/react-router' {
       path: '/api/mcp'
       fullPath: '/api/mcp'
       preLoaderRoute: typeof ApiMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard': {
@@ -601,6 +621,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   TakedownRoute: TakedownRoute,
   TermsRoute: TermsRoute,
+  ApiHealthRoute: ApiHealthRoute,
   ApiMcpRoute: ApiMcpRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
   ApiV1Brief_productRoute: ApiV1Brief_productRoute,
