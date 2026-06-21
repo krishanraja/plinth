@@ -39,23 +39,32 @@ to at least one of them.
 
 ## Roadmap
 
-**Shipped in v1 scope:** marketing site, dashboard, magic-link auth,
-single secret API key (plk_), waitlist + approval gate, REST stubs for
-`read_product` and `resolve_product`, MCP route with x402 on Base
-Sepolia, full data model with RLS, admin shell, docs.
+**Shipped and live (2026-06-21):** marketing site, dashboard (keys, usage, billing, overview),
+auth, single secret API key (`plk_`), all four tools live over REST (`read_product`,
+`resolve_product`, `compare_products`, `brief_product`) plus `read_product` and `resolve_product`
+over MCP, the extraction worker with confidence scoring and price bands, per-plan rate limiting,
+usage metering, Stripe billing (checkout + portal + webhook, verified to live Stripe), x402
+settlement on Base Sepolia (facilitator verify and settle, full flow proven), full data model with
+RLS, `/api/health`, CI, and interim legal pages.
 
-**Deferred:** `compare_products`, `brief_product`, mainnet x402,
-mobile-first dashboard, SDKs (TS first, then Python), regional caches.
+**Deferred:** mainnet x402, outbound webhooks (no async events yet in the sync-tool v1), SDKs
+(TS first, then Python), `compare_products` / `brief_product` over MCP, regional caches, and the
+async `resolve_product` job model.
+
+**Founder-gated before paid GA:** counsel review of the interim legal, the paid-GA flip, and a
+completed test payment to confirm the subscription-activation webhook.
 
 ## Success metrics
 
-- **Activation:** time from sign-in to first 200 OK on `read_product`.
-  Target: < 3 minutes.
-- **Retention:** weekly resolves per active account.
-- **Monetization:** free → paid conversion at the 1k-call cap; agent
-  share of revenue via x402 (mainnet).
-- **Quality:** cache hit rate; share of responses ≥ 0.7 confidence;
-  takedown count / week.
+The North Star and stop conditions are the decision record in
+[../docs/KILL-CRITERIA.md](../docs/KILL-CRITERIA.md). In short:
+
+- **North Star:** weekly high-confidence (>= 0.7) calls per active account.
+- **Activation:** time from sign-in to first 200 on `read_product`. Target under 3 minutes.
+- **Retention:** week-over-week repeat rate.
+- **Monetization:** free to paid conversion at the included-call cap; agent share of revenue via
+  x402 (at mainnet).
+- **Quality:** trust rate (share at or above 0.7), cache hit rate, takedowns per week.
 
 ---
-Last reviewed: 2026-06-17.
+Last reviewed: 2026-06-21.

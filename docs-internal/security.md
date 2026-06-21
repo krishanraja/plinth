@@ -2,7 +2,7 @@
 
 ## Auth model
 
-- Magic-link email auth (Lovable Cloud / Supabase Auth).
+- Email auth via Supabase Auth (project `cgkcplcamsijghalintq`).
 - Sessions managed by Supabase; never persisted server-side.
 - Customer API keys: `plk_` prefix + 32 random bytes. sha256-hashed at
   rest. Shown ONCE at creation. One key per account in v1.
@@ -23,11 +23,14 @@ store role on `profiles`.
 
 ## Secrets handling
 
-- All secrets stored via Lovable secrets manager.
-- Read inside server-function handlers, never at module scope of
-  client-imported files.
-- Service-role key never imported in route files at the top level.
-- Webhook secrets: rotate every 90 days.
+- Secrets are Vercel environment variables (app and worker projects). Ops copies live in the local
+  gitignored vault (`.claude/secrets/plinth.env`); never inline a secret into a commit, PR, or
+  synced doc.
+- Read inside server-function handlers (or dynamically imported `*.server.ts`), never at module
+  scope of client-imported files.
+- The Supabase service-role key is never imported at the top level of a route file.
+- Stripe webhook secret: rotate every 90 days. The beta Stripe keys were pasted in chat and should
+  be rotated.
 
 ## Abuse handling
 
@@ -38,10 +41,10 @@ store role on `profiles`.
 
 ## Dependency policy
 
-- npm packages reviewed for Worker compatibility (no node-gyp, no
-  child_process, no native bindings).
-- `bun audit` run before each release; high/critical patched same week.
-- Avoid packages that assume a long-lived Node process.
+- The app runs on Vercel Node functions, so full Node is available. Still keep functions lean and
+  prefer fetch over heavy SDKs (the Stripe and x402 integrations use plain `fetch`, not SDKs).
+- `bun audit` before each release; high/critical patched the same week.
+- Keep cold starts small: avoid pulling large native deps into the SSR path.
 
 ## Security memory
 
@@ -50,4 +53,4 @@ memory (managed via the security tool). Update both when posture
 changes.
 
 ---
-Last reviewed: 2026-06-17.
+Last reviewed: 2026-06-21.

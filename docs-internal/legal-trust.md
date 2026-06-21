@@ -2,11 +2,13 @@
 
 ## Status of legal pages
 
-- `/terms` — stub. Final text pending counsel review.
-- `/privacy` — stub. Final text pending counsel review.
-- `/takedown` — live form, writes to `takedown_requests`.
+- `/terms`: interim text live (extraction and caching, price band, confidence, billing, x402,
+  refunds), marked interim and pending counsel.
+- `/privacy`: interim text live (what we collect, the cache, processors, retention, takedowns),
+  marked interim and pending counsel.
+- `/takedown`: live form, writes to `takedown_requests`.
 
-These ship in v1 marked as stubs. Replace before paid GA.
+The interim pages are honest about real behaviour. Counsel review is required before paid GA.
 
 ## DMCA / takedown process
 
@@ -39,15 +41,15 @@ purposes without independent verification."
 
 ## x402 wallet custody
 
-We do not custody customer funds. The x402 recipient address is our
-own multisig; settlements are per-call and immediate. We do not pool,
-lend, or rehypothecate received USDC.
+We do not custody customer funds. Settlements are per-call and immediate, straight to
+`X402_RECIPIENT`. In the Base Sepolia beta this is a single wallet; for mainnet GA, move it to a
+secured wallet (multisig recommended). We do not pool, lend, or rehypothecate received USDC.
 
 ## Data residency
 
-Lovable Cloud hosts the primary database. The extractor worker is
-deployable per region; v1 runs in a single region. Customers with
-residency requirements should be quoted on the Custom plan.
+Supabase (project `cgkcplcamsijghalintq`) hosts the primary database; the app and the extractor
+worker run on Vercel. The worker is deployable per region; v1 runs in a single region. Customers
+with residency requirements should be quoted on the Custom plan.
 
 ## Audit
 
@@ -55,4 +57,4 @@ The `audit_log` table records: takedowns received and applied, key
 revocations, admin actions, refund issuances. Retention: 7 years.
 
 ---
-Last reviewed: 2026-06-17.
+Last reviewed: 2026-06-21.

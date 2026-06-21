@@ -2,83 +2,83 @@
 
 ## Stack
 
-- **Framework:** TanStack Start v1 (React 19, SSR, file-based routing).
-- **Build:** Vite 7, deployed to Cloudflare Workers (nodejs_compat).
-- **Styling:** Tailwind v4 via `src/styles.css`, semantic tokens only.
-- **Backend:** Lovable Cloud (Supabase under the hood). Never call it
-  "Supabase" to users.
-- **AI:** Lovable AI Gateway by default. No third-party model keys
-  unless the user explicitly requests one.
+- **Framework:** TanStack Start (React 19, SSR, file-based routing) on Vite, built with Nitro.
+- **Hosting:** Vercel (Node / Fluid Compute functions, not edge). `main` auto-deploys; PRs get
+  preview deploys. `src/server.ts` is the Nitro entry.
+- **Styling:** Tailwind v4 via `src/styles.css`, semantic tokens only (Editorial Warm).
+- **Backend:** Supabase, project `cgkcplcamsijghalintq` (own project; Lovable has been ejected).
+  Postgres 17, RLS on every table, PostgREST, Auth, `pg_cron` for cache purge.
+- **Extraction:** a separate worker (see below). No model-gateway dependency in the core path;
+  `resolve_product` uses Exa for retrieval.
 
 ## Repo layout
 
 ```
 src/
-  routes/               file-based routes; dots = slashes
-    _authenticated/     route gate, dashboard pages
-    api/                server routes (mcp.ts, v1/*.ts)
-    docs.*.tsx          public docs
-  components/           UI components
-    site/               header/footer
-    auth/               AuthModal
-    ui/                 shadcn primitives
+  routes/
+    _authenticated/     route gate, dashboard pages (keys, usage, billing, overview)
+    api/
+      v1/               REST tools: read_product, resolve_product, compare_products, brief_product
+      mcp.ts            MCP JSON-RPC server (free discovery, paid tools/call)
+      stripe/webhook.ts Stripe webhook (manual HMAC verify)
+      health.ts         /api/health probe
+    terms.tsx, privacy.tsx, docs.*.tsx   public pages
+  components/           UI (site/, auth/, ui/ shadcn primitives)
   lib/
     auth.tsx            AuthProvider + useAuth
-    *.functions.ts      createServerFn modules
-  integrations/supabase/ auto-generated, do not edit
-  assets/               CDN-uploaded binaries (.asset.json pointers)
-supabase/migrations/    SQL migrations, append-only
-docs-internal/          this directory
+    api/                billing.functions.ts, x402.server.ts, keys.functions.ts
+  integrations/supabase/  client(s), api-keys.server, rate-limit.server, generated types
+supabase/migrations/    SQL, append-only
+docs-internal/          this directory      docs/  public-facing decision records
 ```
 
-## Route conventions
+## Route + server-function conventions
 
-- File names use dots (`docs.webhooks.tsx` → `/docs/webhooks`).
-- `_authenticated/route.tsx` guards every dashboard route; loaders
-  under it may call protected server functions.
-- Public routes must NOT call `requireSupabaseAuth` server functions
-  from loaders. Call from components via `useServerFn` + `useQuery`.
-- Customer-callable HTTP endpoints live under `src/routes/api/v1/`.
-  Webhook receivers and any unauth public endpoints live under
-  `src/routes/api/public/`.
-
-## Server functions
-
-- App-internal logic: `createServerFn` from `@tanstack/react-start`.
-- Files named `*.functions.ts(x)`. Never import from `src/server/`.
-- Authed functions chain `.middleware([requireSupabaseAuth])`; admin
-  surfaces also check `has_role(auth.uid(), 'admin')`.
-- `src/start.ts` registers `attachSupabaseAuth` globally; never remove.
+- File names use dots (`dashboard.billing.tsx` -> `/dashboard/billing`).
+- `_authenticated/route.tsx` guards dashboard routes.
+- Customer-callable HTTP endpoints are `createFileRoute(...).server.handlers`. Server-only modules
+  (`*.server.ts`, anything importing `supabaseAdmin` or secrets) are dynamically imported inside the
+  handler so they never reach the client bundle.
+- App-internal mutations use `createServerFn` in `*.functions.ts`, chaining
+  `.middleware([requireSupabaseAuth])`; admin surfaces also check `has_role(auth.uid(), 'admin')`.
+- `src/start.ts` registers `attachSupabaseAuth` globally; do not remove.
+- `routeTree.gen.ts` is generated at build. After adding a route, build before committing so the
+  committed tree includes it (and tsc stays green).
 
 ## External worker
 
-A separate worker (out of repo) handles JSON-LD parsing, headless
-render, barcode lookup, and cache eviction. The site calls it via
-HTTPS; secrets live in Lovable Cloud secrets. This split keeps Cloudflare
-Worker SSR small and lets the extractor run heavy headless Chrome on a
-different host.
+A separate deploy (`krishanraja/plinth-worker`, Vercel, Node) does the real work: JSON-LD,
+OpenGraph, Shopify, barcode lookup, headless render (Browserless), confidence scoring, and the cache
+read/write. The app proxies tool calls to it over HTTPS with `PLINTH_EXTRACTOR_TOKEN`. Keeping
+extraction out of the SSR app keeps the app functions small and lets the worker run heavy work
+elsewhere. The worker exposes `/extract` and `/health`.
 
-## Env vars
+## Env vars (app)
 
-- `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` — auto-injected.
-- `PLINTH_EXTRACTOR_URL`, `PLINTH_EXTRACTOR_TOKEN` — worker (to add).
-- `X402_RECIPIENT` — Base Sepolia address (to add at launch).
-- `RESEND_API_KEY` — transactional email (to add when domain ready).
-- `STRIPE_SECRET_KEY` — set via `enable_stripe_payments`.
+- `PLINTH_EXTRACTOR_URL`, `PLINTH_EXTRACTOR_TOKEN` -- the worker.
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` -- billing.
+- `X402_RECIPIENT` -- the Base Sepolia payee. `X402_FACILITATOR`, `X402_NETWORK`, `X402_ASSET`,
+  `X402_PRICE_ATOMIC` are optional (sane Base Sepolia defaults live in `x402.server.ts`).
+- `APP_BASE_URL` -- absolute base for Stripe redirect URLs (defaults to the Vercel URL; set to
+  `https://onplinth.io` once DNS resolves).
+- Supabase URL + publishable key (`VITE_*`) for the client; service role for server-only admin.
 
-`process.env.*` is server-only. Read inside `.handler()`, never at
-module scope of shared files.
+Worker env: `PLINTH_EXTRACTOR_TOKEN`, `EXA_API_KEY` (resolve), Browserless token, Supabase service
+role. `process.env.*` is server-only: read it inside the handler, never at shared-module scope.
 
-## Local dev
+## Local dev and deploy
 
-`bun install` is automatic. Vite dev server is managed by the platform;
-don't run `bun run dev` manually. Migrations are applied via the
-`supabase--migration` tool, not psql.
+```bash
+bun install
+bunx tsc --noEmit
+bun run build      # also regenerates routeTree.gen.ts
+bun run lint
+```
 
-## Deploy
-
-Lovable handles deploys. The agent never runs `wrangler` or `bun run build`
-directly; it lets the platform build.
+Ship: branch, PR, green CI (`.github/workflows/ci.yml`: install, em-dash grep on `src/`, tsc, build;
+lint runs non-blocking pending a one-time prettier pass), squash-merge. Vercel deploys `main`
+automatically. Migrations are applied to `cgkc` via the Supabase Management API / MCP and mirrored
+into `supabase/migrations/`.
 
 ---
-Last reviewed: 2026-06-17.
+Last reviewed: 2026-06-21.
