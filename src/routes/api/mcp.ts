@@ -165,15 +165,8 @@ export const Route = createFileRoute("/api/mcp")({
 
             // Meter keyed calls (x402 calls are recorded on-chain by the facilitator).
             if (principal) {
-              let cost = 0;
-              let cached = false;
-              try {
-                const env = JSON.parse(text) as { cost_usd?: number; cached?: boolean };
-                if (typeof env.cost_usd === "number") cost = env.cost_usd;
-                cached = Boolean(env.cached);
-              } catch {
-                /* non-JSON */
-              }
+              const { stampFromResponse } = await import("@/lib/api/meter");
+              const stamp = stampFromResponse(text, payload as { url?: unknown; gtin?: unknown; name?: unknown });
               try {
                 const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
                 await Promise.all([
@@ -182,10 +175,16 @@ export const Route = createFileRoute("/api/mcp")({
                     api_key_id: principal.keyId,
                     tool: name,
                     endpoint: "/api/mcp",
-                    cached,
+                    cached: stamp.cached,
                     status,
-                    cost_usd: cost,
+                    cost_usd: stamp.cost_usd,
                     latency_ms: Date.now() - started,
+                    request_id: stamp.request_id,
+                    confidence: stamp.confidence,
+                    product_returned: stamp.product_returned,
+                    domain: stamp.domain,
+                    envelope_hash: stamp.envelope_hash,
+                    calibration_version: stamp.calibration_version,
                   }),
                   supabaseAdmin.from("api_keys").update({ last_used_at: new Date().toISOString() }).eq("id", principal.keyId),
                 ]);

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { postOnly } from "@/lib/api/http";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- Stripe webhook event payloads are dynamic untyped JSON */
@@ -56,6 +57,7 @@ async function upsertSubscription(admin: AdminClient, userId: string, sub: Recor
 export const Route = createFileRoute("/api/stripe/webhook")({
   server: {
     handlers: {
+      ...postOnly,
       POST: async ({ request }) => {
         const secret = process.env.STRIPE_WEBHOOK_SECRET;
         const sk = process.env.STRIPE_SECRET_KEY;

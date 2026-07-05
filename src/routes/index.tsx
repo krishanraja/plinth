@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { API_BASE, MCP_URL, DEMO_GTIN } from "@/config/product";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -30,35 +31,38 @@ export const Route = createFileRoute("/")({
 
 type Line = { text: string; cls?: string; delay: number };
 
+// PLAN F0.8: the hero streams a REAL captured response, verbatim from the live
+// extraction worker (src/data/hero-capture.json). Never hand-write response values here.
+import heroCapture from "@/data/hero-capture.json";
+
+const heroEnv = heroCapture.envelope;
+const heroFC = heroEnv.field_confidence as Record<string, number>;
+
 const RESPONSE_LINES: Line[] = [
   { text: "{", delay: 0 },
-  { text: '  "canonical": {', delay: 90 },
-  { text: '    "gtin":  "00194253433767",', delay: 60 },
-  { text: '    "brand": "Apple",', delay: 60 },
-  { text: '    "model": "MacBook Pro 16-inch (M3 Pro, 2024)"', delay: 60 },
-  { text: "  },", delay: 60 },
-  { text: '  "title": "Apple MacBook Pro 16\\" M3 Pro 1TB Space Black",', delay: 80 },
-  { text: '  "attributes": {', delay: 70 },
-  { text: '    "screen_size_in": 16.2,', delay: 50 },
-  { text: '    "storage_gb":     1024,', delay: 50 },
-  { text: '    "color":          "Space Black"', delay: 50 },
+  { text: `  "product": {`, delay: 90 },
+  { text: `    "title":    "${heroEnv.product.title}",`, delay: 70 },
+  { text: `    "brand":    "${heroEnv.product.brand}",`, delay: 60 },
+  { text: `    "gtin":     "${heroEnv.product.gtin}",`, delay: 60 },
+  { text: `    "category": "${heroEnv.product.category}",`, delay: 60 },
+  { text: `    "attributes": { "quantity": "${(heroEnv.product.attributes as Record<string, string>).quantity}", "nutriscore": "${(heroEnv.product.attributes as Record<string, string>).nutriscore}" }`, delay: 70 },
   { text: "  },", delay: 50 },
-  { text: '  "price": {', delay: 90 },
-  { text: '    "band":      { "low": 2399, "high": 2699, "currency": "USD" },', delay: 70 },
-  { text: '    "as_of":     "2026-06-17T14:00:00Z",', delay: 50 },
-  { text: '    "n_sources": 3', delay: 50 },
+  { text: '  "field_confidence": {', delay: 90 },
+  { text: `    "gtin":  ${heroFC.gtin},  "brand": ${heroFC.brand},`, delay: 60 },
+  { text: `    "title": ${heroFC.title},   "category": ${heroFC.category}`, delay: 60 },
   { text: "  },", delay: 50 },
-  { text: '  "source": { "method": "jsonld", "urls": ["apple.com/…"] },', delay: 90 },
-  { text: '  "confidence": 0.81,', cls: "text-signal", delay: 180 },
-  { text: '  "cost_usd":   0.012', cls: "text-signal", delay: 180 },
+  { text: `  "method":  "${heroEnv.method}",`, delay: 80 },
+  { text: `  "as_of":   "${heroEnv.as_of}",`, delay: 60 },
+  { text: `  "confidence": ${heroEnv.confidence},`, cls: "text-signal", delay: 180 },
+  { text: `  "cost_usd":   ${heroEnv.cost_usd}`, cls: "text-signal", delay: 180 },
   { text: "}", delay: 80 },
 ];
 
 const TOOLS = [
   { name: "read_product", desc: "One reference (URL/GTIN) → typed product object.", live: true },
   { name: "resolve_product", desc: "Fuzzy string → canonical identifiers.", live: true },
-  { name: "compare_products", desc: "N references → matrix of deltas.", live: false },
-  { name: "brief_product", desc: "Object + short read for the agent.", live: false },
+  { name: "compare_products", desc: "N references → matrix of deltas.", live: true },
+  { name: "brief_product", desc: "Object + short read for the agent.", live: true },
 ];
 
 function useStream(lines: Line[]) {
@@ -164,7 +168,7 @@ function Index() {
               <div className="flex items-center justify-between border-b border-hairline px-4 py-3 font-mono text-xs">
                 <div className="flex items-center gap-2">
                   <span className="rounded-sm bg-signal/15 px-1.5 py-0.5 text-signal">POST</span>
-                  <span className="text-muted-foreground">plinth.sh/v1/</span>
+                  <span className="text-muted-foreground">/api/v1/</span>
                   <span className="text-foreground">read_product</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -174,9 +178,9 @@ function Index() {
               </div>
               <div className="border-b border-hairline px-4 py-3 font-mono text-xs leading-relaxed">
                 <span className="text-muted-foreground">{"{ "}</span>
-                <span className="text-foreground">"url"</span>
+                <span className="text-foreground">"gtin"</span>
                 <span className="text-muted-foreground">: </span>
-                <span className="text-signal break-all">"https://www.apple.com/shop/buy-mac/macbook-pro/16-inch"</span>
+                <span className="text-signal break-all">"{heroCapture._meta.input.gtin}"</span>
                 <span className="text-muted-foreground">{" }"}</span>
               </div>
               <div className="px-4 py-4">
@@ -194,6 +198,9 @@ function Index() {
                   })}
                   {shown === 0 && <div className="caret">&nbsp;</div>}
                 </pre>
+              </div>
+              <div className="border-t border-hairline px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                A real response, captured from the live API. URL reads are in private beta.
               </div>
             </div>
           </div>
@@ -346,9 +353,9 @@ function Index() {
                 <span className="dot" /> dev · REST
               </div>
               <pre className="mt-5 overflow-x-auto font-mono text-xs leading-relaxed text-foreground">
-{`curl https://plinth.sh/v1/read_product \\
+{`curl -X POST ${API_BASE}/read_product \\
   -H "authorization: Bearer plk_…" \\
-  -d '{ "url": "https://store.com/p/123" }'`}
+  -d '{ "gtin": "${DEMO_GTIN}" }'`}
               </pre>
             </div>
             <div className="rounded-md border border-hairline bg-surface p-6">
@@ -356,10 +363,10 @@ function Index() {
                 <span className="dot" style={{ background: "var(--verified)" }} /> agent · MCP + x402
               </div>
               <pre className="mt-5 overflow-x-auto font-mono text-xs leading-relaxed text-foreground">
-{`mcp://plinth.sh/api/mcp
+{`${MCP_URL}
   tool: read_product
   pay:  USDC on Base Sepolia
-  → { …object, cost_usd: 0.012 }`}
+  → { …object, cost_usd: 0.008 }`}
               </pre>
             </div>
           </div>

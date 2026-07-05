@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { postOnly } from "@/lib/api/http";
 
 // v1 REST: compare_products. Extracts 2 to 5 product URLs (via the worker) and returns a
 // side-by-side matrix plus the price delta. Validates a plk_ key, rate-limits, meters once.
@@ -19,6 +20,7 @@ function json(body: unknown, status: number, extra?: Record<string, string>) {
 export const Route = createFileRoute("/api/v1/compare_products")({
   server: {
     handlers: {
+      ...postOnly,
       POST: async ({ request }) => {
         const WORKER_URL = process.env.PLINTH_EXTRACTOR_URL;
         const WORKER_TOKEN = process.env.PLINTH_EXTRACTOR_TOKEN;
@@ -84,6 +86,10 @@ export const Route = createFileRoute("/api/v1/compare_products")({
         const cost = Number(results.reduce((s, e) => s + (typeof e.cost_usd === "number" ? e.cost_usd : 0), 0).toFixed(6));
         const cached = results.some((e) => e.cached);
 
+        // Stamp with the best (highest-confidence) envelope of the batch; domain from the first URL.
+        const best = results.reduce((a, e) => ((e.confidence ?? 0) > (a.confidence ?? 0) ? e : a), results[0]);
+        const { stampFromResponse } = await import("@/lib/api/meter");
+        const stamp = stampFromResponse(JSON.stringify(best ?? {}), { url: (urls as string[])[0] });
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           await Promise.all([
@@ -96,6 +102,12 @@ export const Route = createFileRoute("/api/v1/compare_products")({
               status: 200,
               cost_usd: cost,
               latency_ms: Date.now() - started,
+              request_id: stamp.request_id,
+              confidence: stamp.confidence,
+              product_returned: stamp.product_returned,
+              domain: stamp.domain,
+              envelope_hash: stamp.envelope_hash,
+              calibration_version: stamp.calibration_version,
             }),
             supabaseAdmin.from("api_keys").update({ last_used_at: new Date().toISOString() }).eq("id", principal.keyId),
           ]);

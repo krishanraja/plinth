@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { postOnly } from "@/lib/api/http";
 
 // v1 REST: read_product. Validates a plk_ API key, proxies {url|gtin} to the Plinth
 // extraction worker, meters the call into usage_events, and returns the typed ProductEnvelope.
@@ -13,6 +14,7 @@ function json(body: unknown, status: number) {
 export const Route = createFileRoute("/api/v1/read_product")({
   server: {
     handlers: {
+      ...postOnly,
       POST: async ({ request }) => {
         const WORKER_URL = process.env.PLINTH_EXTRACTOR_URL;
         const WORKER_TOKEN = process.env.PLINTH_EXTRACTOR_TOKEN;
@@ -83,15 +85,9 @@ export const Route = createFileRoute("/api/v1/read_product")({
         }
 
         // Meter the call (best-effort; never fail the response on a metering error).
-        let cost = 0;
-        let cached = false;
-        try {
-          const env = JSON.parse(text) as { cost_usd?: number; cached?: boolean };
-          if (typeof env.cost_usd === "number") cost = env.cost_usd;
-          cached = Boolean(env.cached);
-        } catch {
-          /* non-JSON upstream body */
-        }
+        // F0.7: the row is a calibration observation, not just a billable count.
+        const { stampFromResponse } = await import("@/lib/api/meter");
+        const stamp = stampFromResponse(text, { url: b.url, gtin: b.gtin });
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           // Awaited: serverless freezes the function after the response, so a fire-and-forget
@@ -102,10 +98,16 @@ export const Route = createFileRoute("/api/v1/read_product")({
               api_key_id: principal.keyId,
               tool: "read_product",
               endpoint: "/api/v1/read_product",
-              cached,
+              cached: stamp.cached,
               status,
-              cost_usd: cost,
+              cost_usd: stamp.cost_usd,
               latency_ms: Date.now() - started,
+              request_id: stamp.request_id,
+              confidence: stamp.confidence,
+              product_returned: stamp.product_returned,
+              domain: stamp.domain,
+              envelope_hash: stamp.envelope_hash,
+              calibration_version: stamp.calibration_version,
             }),
             supabaseAdmin
               .from("api_keys")

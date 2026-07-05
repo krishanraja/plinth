@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { demoCurl } from "@/config/product";
 
 function Overview() {
   return (
@@ -22,12 +23,12 @@ function Overview() {
           </li>
           <li>Call read_product with it:</li>
         </ol>
-        <pre className="mt-3 overflow-x-auto rounded-sm border border-hairline bg-background p-4 font-mono text-xs">
-          {`curl -X POST https://plinth-tan.vercel.app/api/v1/read_product \\
-  -H "authorization: Bearer plk_your_key" \\
-  -H "content-type: application/json" \\
-  -d '{"url":"https://an-example-store.com/products/thing"}'`}
+        <pre className="mt-3 overflow-x-auto whitespace-pre rounded-sm border border-hairline bg-background p-4 font-mono text-xs">
+          {demoCurl()}
         </pre>
+        <p className="mt-2 font-mono text-[11px] text-muted-foreground">
+          The sample GTIN is real and returns a real object you can inspect. Swap in your key and run it as-is.
+        </p>
         <p className="mt-3 text-sm text-muted-foreground">
           Full reference in the{" "}
           <a href="/docs" className="text-signal underline">

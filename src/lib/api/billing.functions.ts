@@ -15,8 +15,10 @@ async function stripePost(path: string, params: Record<string, string>, sk: stri
   return (await res.json()) as Record<string, unknown> & { error?: { message?: string } };
 }
 
+import { APP_ORIGIN } from "@/config/product";
+
 function baseUrl() {
-  return process.env.APP_BASE_URL ?? "https://plinth-tan.vercel.app";
+  return process.env.APP_BASE_URL ?? APP_ORIGIN;
 }
 
 // Start a Stripe Checkout (subscription) for the signed-in user. Returns the hosted URL.
