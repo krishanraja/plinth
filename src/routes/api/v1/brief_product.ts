@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { postOnly } from "@/lib/api/http";
 
 // v1 REST: brief_product. One input (url | gtin | name) -> typed product + a short
 // agent-readable brief composed from the typed fields (no LLM; deterministic + honest).
@@ -37,6 +38,7 @@ function composeBrief(e: Envelope): string {
 export const Route = createFileRoute("/api/v1/brief_product")({
   server: {
     handlers: {
+      ...postOnly,
       POST: async ({ request }) => {
         const WORKER_URL = process.env.PLINTH_EXTRACTOR_URL;
         const WORKER_TOKEN = process.env.PLINTH_EXTRACTOR_TOKEN;
@@ -84,6 +86,8 @@ export const Route = createFileRoute("/api/v1/brief_product")({
         }
 
         const cost = typeof env.cost_usd === "number" ? env.cost_usd : 0;
+        const { stampFromResponse } = await import("@/lib/api/meter");
+        const stamp = stampFromResponse(JSON.stringify(env), { [provided[0]]: b[provided[0]] });
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           await Promise.all([
@@ -96,6 +100,12 @@ export const Route = createFileRoute("/api/v1/brief_product")({
               status,
               cost_usd: cost,
               latency_ms: Date.now() - started,
+              request_id: stamp.request_id,
+              confidence: stamp.confidence,
+              product_returned: stamp.product_returned,
+              domain: stamp.domain,
+              envelope_hash: stamp.envelope_hash,
+              calibration_version: stamp.calibration_version,
             }),
             supabaseAdmin.from("api_keys").update({ last_used_at: new Date().toISOString() }).eq("id", principal.keyId),
           ]);

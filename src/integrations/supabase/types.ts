@@ -372,6 +372,11 @@ export type Database = {
           latency_ms: number | null
           meta: Json
           request_id: string | null
+          confidence: number | null
+          product_returned: boolean | null
+          domain: string | null
+          envelope_hash: string | null
+          calibration_version: string | null
           status: number
           tool: string
           user_id: string
@@ -386,6 +391,11 @@ export type Database = {
           latency_ms?: number | null
           meta?: Json
           request_id?: string | null
+          confidence?: number | null
+          product_returned?: boolean | null
+          domain?: string | null
+          envelope_hash?: string | null
+          calibration_version?: string | null
           status?: number
           tool: string
           user_id: string
@@ -400,6 +410,11 @@ export type Database = {
           latency_ms?: number | null
           meta?: Json
           request_id?: string | null
+          confidence?: number | null
+          product_returned?: boolean | null
+          domain?: string | null
+          envelope_hash?: string | null
+          calibration_version?: string | null
           status?: number
           tool?: string
           user_id?: string

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { postOnly } from "@/lib/api/http";
 
 // v1 REST: resolve_product. Fuzzy product name -> typed product object (via Exa retrieval + extraction
 // on the worker). Validates a plk_ key, rate-limits, meters. Returns the worker's ProductEnvelope.
@@ -10,6 +11,7 @@ function json(body: unknown, status: number) {
 export const Route = createFileRoute("/api/v1/resolve_product")({
   server: {
     handlers: {
+      ...postOnly,
       POST: async ({ request }) => {
         const WORKER_URL = process.env.PLINTH_EXTRACTOR_URL;
         const WORKER_TOKEN = process.env.PLINTH_EXTRACTOR_TOKEN;
@@ -64,15 +66,8 @@ export const Route = createFileRoute("/api/v1/resolve_product")({
           /* upstream */
         }
 
-        let cost = 0;
-        let cached = false;
-        try {
-          const env = JSON.parse(text) as { cost_usd?: number; cached?: boolean };
-          if (typeof env.cost_usd === "number") cost = env.cost_usd;
-          cached = Boolean(env.cached);
-        } catch {
-          /* non-JSON */
-        }
+        const { stampFromResponse } = await import("@/lib/api/meter");
+        const stamp = stampFromResponse(text, { name: b.name });
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           await Promise.all([
@@ -81,10 +76,16 @@ export const Route = createFileRoute("/api/v1/resolve_product")({
               api_key_id: principal.keyId,
               tool: "resolve_product",
               endpoint: "/api/v1/resolve_product",
-              cached,
+              cached: stamp.cached,
               status,
-              cost_usd: cost,
+              cost_usd: stamp.cost_usd,
               latency_ms: Date.now() - started,
+              request_id: stamp.request_id,
+              confidence: stamp.confidence,
+              product_returned: stamp.product_returned,
+              domain: stamp.domain,
+              envelope_hash: stamp.envelope_hash,
+              calibration_version: stamp.calibration_version,
             }),
             supabaseAdmin.from("api_keys").update({ last_used_at: new Date().toISOString() }).eq("id", principal.keyId),
           ]);

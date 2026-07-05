@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { MCP_URL } from "@/config/product";
 export const Route = createFileRoute("/docs/mcp")({
   component: () => (
     <article className="space-y-6">
@@ -9,7 +10,7 @@ export const Route = createFileRoute("/docs/mcp")({
       </p>
       <h2 className="font-display text-2xl mt-6">Endpoint</h2>
       <pre className="rounded-md border border-hairline bg-surface p-5 font-mono text-sm overflow-x-auto">
-{`POST https://plinth.sh/api/mcp
+{`POST ${MCP_URL}
 Accept: application/json, text/event-stream`}
       </pre>
       <h2 className="font-display text-2xl mt-6">Payment (x402)</h2>

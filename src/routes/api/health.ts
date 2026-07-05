@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { getOnly } from "@/lib/api/http";
 
 // Public health probe: worker reachability + which subsystems are configured.
 // Used for uptime monitoring and a quick GA-readiness read. No auth, never cached.
@@ -6,6 +7,7 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/api/health")({
   server: {
     handlers: {
+      ...getOnly,
       GET: async () => {
         const checks: Record<string, string> = {};
 
