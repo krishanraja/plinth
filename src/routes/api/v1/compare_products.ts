@@ -37,6 +37,13 @@ export const Route = createFileRoute("/api/v1/compare_products")({
         const rlh = rateHeaders(rl);
         if (!rl.allowed) return json({ error: "rate_limited", message: "Rate limit exceeded." }, 429, { ...rlh, "retry-after": String(rl.reset) });
 
+        const { entitlementCheck, quotaBlockedBody } = await import("@/integrations/supabase/entitlement.server");
+        const ent = await entitlementCheck(principal.userId);
+        if (!ent.allowed) {
+          const { APP_ORIGIN } = await import("@/config/product");
+          return json(quotaBlockedBody(ent, `${APP_ORIGIN}/dashboard/billing`), 402, rlh);
+        }
+
         let body: unknown;
         try {
           body = await request.json();
@@ -105,6 +112,7 @@ export const Route = createFileRoute("/api/v1/compare_products")({
               request_id: stamp.request_id,
               confidence: stamp.confidence,
               product_returned: stamp.product_returned,
+              billable: stamp.billable,
               domain: stamp.domain,
               envelope_hash: stamp.envelope_hash,
               calibration_version: stamp.calibration_version,

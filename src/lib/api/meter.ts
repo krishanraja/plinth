@@ -7,12 +7,18 @@ export type EnvelopeStamp = {
   request_id: string | null;
   confidence: number | null;
   product_returned: boolean | null;
+  billable: boolean;
   domain: string | null;
   envelope_hash: string;
   calibration_version: string | null;
   cost_usd: number;
   cached: boolean;
 };
+
+// P2.3 trusted-read billing unit: a call is billable only when it returned a trusted
+// product (a real object AND confidence at or above the gate). Nulls and low-confidence
+// reads charge nothing and do not count against the monthly quota.
+const BILLABLE_GATE = 0.7;
 
 type MeterInput = { url?: unknown; gtin?: unknown; name?: unknown };
 
@@ -35,10 +41,13 @@ export function stampFromResponse(text: string, input: MeterInput): EnvelopeStam
   } else if (typeof input.name === "string") {
     domain = "name:";
   }
+  const confidence = typeof env?.confidence === "number" ? env.confidence : null;
+  const productReturned = env ? env.product != null : null;
   return {
     request_id: typeof env?.request_id === "string" ? env.request_id : null,
-    confidence: typeof env?.confidence === "number" ? env.confidence : null,
-    product_returned: env ? env.product != null : null,
+    confidence,
+    product_returned: productReturned,
+    billable: productReturned === true && (confidence ?? 0) >= BILLABLE_GATE,
     domain,
     envelope_hash: createHash("sha256").update(text).digest("hex"),
     calibration_version: typeof env?.calibration_version === "string" ? env.calibration_version : null,

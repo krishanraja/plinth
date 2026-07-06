@@ -140,6 +140,19 @@ export const Route = createFileRoute("/api/mcp")({
                   },
                 );
               }
+              // Monthly quota + cost fuse for keyed calls (x402 calls are paid per call).
+              const { entitlementCheck } = await import("@/integrations/supabase/entitlement.server");
+              const ent = await entitlementCheck(principal.userId);
+              if (!ent.allowed) {
+                return new Response(
+                  JSON.stringify({
+                    jsonrpc: "2.0",
+                    id: id ?? null,
+                    error: { code: -32098, message: ent.reason === "cost_fuse" ? "Free usage safety limit reached." : `Monthly quota reached (${ent.included_calls} calls). Upgrade to continue.` },
+                  }),
+                  { status: 402, headers: { "content-type": "application/json" } },
+                );
+              }
             }
 
             const WORKER_URL = process.env.PLINTH_EXTRACTOR_URL;
@@ -182,6 +195,7 @@ export const Route = createFileRoute("/api/mcp")({
                     request_id: stamp.request_id,
                     confidence: stamp.confidence,
                     product_returned: stamp.product_returned,
+                    billable: stamp.billable,
                     domain: stamp.domain,
                     envelope_hash: stamp.envelope_hash,
                     calibration_version: stamp.calibration_version,
