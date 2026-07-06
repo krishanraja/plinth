@@ -21,11 +21,12 @@ function UsagePage() {
   }, [user]);
 
   const calls = stats?.calls ?? 0;
-  const cachedPct = calls > 0 ? Math.round((100 * (stats?.cached_calls ?? 0)) / calls) : null;
+  // P3.5: zero-state showed a stray "·" glyph; render a clean "0%" instead.
+  const cachedPct = calls > 0 ? Math.round((100 * (stats?.cached_calls ?? 0)) / calls) : 0;
   const cells: [string, string][] = [
     ["Calls", loading ? "…" : String(calls)],
     ["Cost", loading ? "…" : `$${Number(stats?.cost_usd ?? 0).toFixed(2)}`],
-    ["Cached %", loading ? "…" : cachedPct === null ? "·" : `${cachedPct}%`],
+    ["Cached %", loading ? "…" : `${cachedPct}%`],
   ];
 
   return (

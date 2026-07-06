@@ -21,11 +21,14 @@ Accept: application/json, text/event-stream`}
       <pre className="rounded-md border border-hairline bg-surface p-5 font-mono text-sm overflow-x-auto">
 {`402 Payment Required
 {
-  "scheme": "x402",
-  "network": "base-sepolia",
-  "asset": "USDC",
-  "max_amount": "0.05",
-  "recipient": "0x… (configured at launch)"
+  "x402Version": 1,
+  "accepts": [{
+    "scheme": "exact",
+    "network": "base-sepolia",
+    "maxAmountRequired": "10000",   // 0.01 USDC (6 decimals)
+    "asset": "USDC",
+    "payTo": "0x… (the Plinth recipient)"
+  }]
 }`}
       </pre>
     </article>

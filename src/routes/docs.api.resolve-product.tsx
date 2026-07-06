@@ -1,19 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { API_BASE } from "@/config/product";
+
+// P3.7: the old docs described an async API (res_ id + GET /v1/resolutions/{id}) that
+// was never built. The real endpoint is SYNCHRONOUS and takes `name`.
 export const Route = createFileRoute("/docs/api/resolve-product")({
   component: () => (
     <article className="space-y-6">
       <h1 className="font-display text-5xl">resolve_product</h1>
-      <p className="text-lg text-muted-foreground">Fuzzy strings → canonical identifiers. Async: returns a resolution id; finished result is delivered via webhook or poll.</p>
+      <p className="text-lg text-muted-foreground">
+        A fuzzy product name to a typed product object, synchronously. Plinth searches, picks the
+        best matching product page, extracts it, and returns the same envelope as read_product.
+      </p>
       <pre className="rounded-md border border-hairline bg-surface p-5 font-mono text-sm overflow-x-auto">
-{`POST /v1/resolve_product
-{ "query": "macbook pro 16 m3 pro space black 1tb" }
+{`POST ${API_BASE}/resolve_product
+{ "name": "sony wh-1000xm5 wireless headphones" }
 
-→ { "id": "res_…", "status": "pending" }
-
-GET /v1/resolutions/{id}
-→ { "status": "done", "result": {...}, "confidence": 0.74, "cost_usd": 0.043 }`}
+→ {
+  "product": { "title": "...", "brand": "Sony", "price": { ... } },
+  "confidence": 0.74,
+  "method": "jsonld",
+  "cost_usd": 0.012
+}`}
       </pre>
-      <p className="text-muted-foreground">Only resolutions with confidence ≥ 0.7 are cached.</p>
+      <p className="text-muted-foreground">
+        <span className="font-mono">product</span> is null when nothing clears the confidence gate.
+        Pass <span className="font-mono">min_confidence</span> to see lower-confidence candidates.
+      </p>
     </article>
   ),
 });
