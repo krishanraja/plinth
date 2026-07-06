@@ -35,6 +35,7 @@ import { Route as ApiV1Brief_productRouteImport } from './routes/api/v1/brief_pr
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as AuthenticatedDashboardWebhooksRouteImport } from './routes/_authenticated/dashboard.webhooks'
 import { Route as AuthenticatedDashboardUsageRouteImport } from './routes/_authenticated/dashboard.usage'
+import { Route as AuthenticatedDashboardMetricsRouteImport } from './routes/_authenticated/dashboard.metrics'
 import { Route as AuthenticatedDashboardKeysRouteImport } from './routes/_authenticated/dashboard.keys'
 import { Route as AuthenticatedDashboardBillingRouteImport } from './routes/_authenticated/dashboard.billing'
 
@@ -170,6 +171,12 @@ const AuthenticatedDashboardUsageRoute =
     path: '/usage',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardMetricsRoute =
+  AuthenticatedDashboardMetricsRouteImport.update({
+    id: '/metrics',
+    path: '/metrics',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardKeysRoute =
   AuthenticatedDashboardKeysRouteImport.update({
     id: '/keys',
@@ -200,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/docs/': typeof DocsIndexRoute
   '/dashboard/billing': typeof AuthenticatedDashboardBillingRoute
   '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
+  '/dashboard/metrics': typeof AuthenticatedDashboardMetricsRoute
   '/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
   '/dashboard/webhooks': typeof AuthenticatedDashboardWebhooksRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -227,6 +235,7 @@ export interface FileRoutesByTo {
   '/docs': typeof DocsIndexRoute
   '/dashboard/billing': typeof AuthenticatedDashboardBillingRoute
   '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
+  '/dashboard/metrics': typeof AuthenticatedDashboardMetricsRoute
   '/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
   '/dashboard/webhooks': typeof AuthenticatedDashboardWebhooksRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -258,6 +267,7 @@ export interface FileRoutesById {
   '/docs/': typeof DocsIndexRoute
   '/_authenticated/dashboard/billing': typeof AuthenticatedDashboardBillingRoute
   '/_authenticated/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
+  '/_authenticated/dashboard/metrics': typeof AuthenticatedDashboardMetricsRoute
   '/_authenticated/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
   '/_authenticated/dashboard/webhooks': typeof AuthenticatedDashboardWebhooksRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -289,6 +299,7 @@ export interface FileRouteTypes {
     | '/docs/'
     | '/dashboard/billing'
     | '/dashboard/keys'
+    | '/dashboard/metrics'
     | '/dashboard/usage'
     | '/dashboard/webhooks'
     | '/api/stripe/webhook'
@@ -316,6 +327,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/dashboard/billing'
     | '/dashboard/keys'
+    | '/dashboard/metrics'
     | '/dashboard/usage'
     | '/dashboard/webhooks'
     | '/api/stripe/webhook'
@@ -346,6 +358,7 @@ export interface FileRouteTypes {
     | '/docs/'
     | '/_authenticated/dashboard/billing'
     | '/_authenticated/dashboard/keys'
+    | '/_authenticated/dashboard/metrics'
     | '/_authenticated/dashboard/usage'
     | '/_authenticated/dashboard/webhooks'
     | '/api/stripe/webhook'
@@ -560,6 +573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardUsageRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/metrics': {
+      id: '/_authenticated/dashboard/metrics'
+      path: '/metrics'
+      fullPath: '/dashboard/metrics'
+      preLoaderRoute: typeof AuthenticatedDashboardMetricsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/keys': {
       id: '/_authenticated/dashboard/keys'
       path: '/keys'
@@ -580,6 +600,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardBillingRoute: typeof AuthenticatedDashboardBillingRoute
   AuthenticatedDashboardKeysRoute: typeof AuthenticatedDashboardKeysRoute
+  AuthenticatedDashboardMetricsRoute: typeof AuthenticatedDashboardMetricsRoute
   AuthenticatedDashboardUsageRoute: typeof AuthenticatedDashboardUsageRoute
   AuthenticatedDashboardWebhooksRoute: typeof AuthenticatedDashboardWebhooksRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
@@ -589,6 +610,7 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
     AuthenticatedDashboardBillingRoute: AuthenticatedDashboardBillingRoute,
     AuthenticatedDashboardKeysRoute: AuthenticatedDashboardKeysRoute,
+    AuthenticatedDashboardMetricsRoute: AuthenticatedDashboardMetricsRoute,
     AuthenticatedDashboardUsageRoute: AuthenticatedDashboardUsageRoute,
     AuthenticatedDashboardWebhooksRoute: AuthenticatedDashboardWebhooksRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
