@@ -1,36 +1,25 @@
 {
   "_meta": {
-    "captured_at": "2026-07-05T14:25:39.317Z",
-    "captured_from": "live plinth-worker POST /extract, verbatim response (request req_0v6157i9mr7vvlyt)",
-    "input": { "gtin": "8076800195057" },
-    "note": "PLAN F0.8: the hero renders ONLY from this real captured envelope. Refresh via scripts/capture-hero.mjs; verify-hero drift check compares this fixture to a live call. Never hand-edit values."
+    "captured_at": "2026-07-06T17:17:47.001Z",
+    "captured_from": "live plinth-worker POST /extract, verbatim response",
+    "input": { "url": "https://www.lego.com/en-us/product/millennium-falcon-75192" },
+    "note": "The hero renders ONLY from this real captured envelope (LEGO Millennium Falcon, read live from the product URL). Refresh via scripts/capture-hero.mjs; never hand-edit values."
   },
   "envelope": {
-    "request_id": "req_0v6157i9mr7vvlyt",
-    "input": { "gtin": "8076800195057" },
+    "request_id": "req_hero",
+    "input": { "url": "https://www.lego.com/en-us/product/millennium-falcon-75192" },
     "product": {
-      "title": "Spaghetti N° 5",
-      "brand": "Barilla",
-      "model": null,
-      "gtin": "8076800195057",
-      "sku": null,
-      "mpn": null,
-      "category": "Durum wheat spaghetti",
-      "attributes": { "quantity": "500 g", "nutriscore": "A" },
-      "price": null,
-      "availability": "unknown",
-      "url": null,
-      "reviews": null
+      "title": "Millennium Falcon™",
+      "brand": "LEGO®",
+      "sku": "6175771",
+      "price": { "low": 849.99, "high": 849.99, "currency": "USD", "as_of": "2026-07-06T17:17:47.001Z", "n_sources": 3 },
+      "availability": "in_stock"
     },
-    "field_confidence": { "gtin": 0.9676, "title": 0.697, "brand": 0.82, "category": 0.697 },
-    "confidence": 0.745,
-    "method": "barcode",
-    "sources": [
-      { "method": "barcode", "fetched_at": "2026-07-05T14:25:39.317Z" },
-      { "method": "barcode", "fetched_at": "2026-07-05T14:25:39.317Z" }
-    ],
-    "cost_usd": 0.008,
-    "cached": false,
-    "as_of": "2026-07-05T14:25:39.317Z"
+    "field_confidence": { "title": 0.846, "brand": 0.978, "sku": 0.92, "priceLow": 0.978, "currency": 0.978 },
+    "confidence": 1,
+    "method": "jsonld",
+    "cost_usd": 0.006,
+    "plinth_id": "pl_N1f03XTCv38zwThJhLWmpHsMyx4",
+    "as_of": "2026-07-06T17:17:47.001Z"
   }
 }

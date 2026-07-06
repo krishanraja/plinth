@@ -36,23 +36,24 @@ type Line = { text: string; cls?: string; delay: number };
 import heroCapture from "@/data/hero-capture.json";
 
 const heroEnv = heroCapture.envelope;
+const heroP = heroEnv.product;
 const heroFC = heroEnv.field_confidence as Record<string, number>;
 
 const RESPONSE_LINES: Line[] = [
   { text: "{", delay: 0 },
   { text: `  "product": {`, delay: 90 },
-  { text: `    "title":    "${heroEnv.product.title}",`, delay: 70 },
-  { text: `    "brand":    "${heroEnv.product.brand}",`, delay: 60 },
-  { text: `    "gtin":     "${heroEnv.product.gtin}",`, delay: 60 },
-  { text: `    "category": "${heroEnv.product.category}",`, delay: 60 },
-  { text: `    "attributes": { "quantity": "${(heroEnv.product.attributes as Record<string, string>).quantity}", "nutriscore": "${(heroEnv.product.attributes as Record<string, string>).nutriscore}" }`, delay: 70 },
+  { text: `    "title":  "${heroP.title}",`, delay: 70 },
+  { text: `    "brand":  "${heroP.brand}",`, delay: 60 },
+  { text: `    "sku":    "${heroP.sku}",`, delay: 60 },
+  { text: `    "price":  { "low": ${heroP.price.low}, "high": ${heroP.price.high}, "currency": "${heroP.price.currency}", "n_sources": ${heroP.price.n_sources} },`, delay: 70 },
+  { text: `    "availability": "${heroP.availability}"`, delay: 60 },
   { text: "  },", delay: 50 },
   { text: '  "field_confidence": {', delay: 90 },
-  { text: `    "gtin":  ${heroFC.gtin},  "brand": ${heroFC.brand},`, delay: 60 },
-  { text: `    "title": ${heroFC.title},   "category": ${heroFC.category}`, delay: 60 },
+  { text: `    "title": ${heroFC.title},  "brand": ${heroFC.brand},`, delay: 60 },
+  { text: `    "sku":   ${heroFC.sku},   "priceLow": ${heroFC.priceLow}`, delay: 60 },
   { text: "  },", delay: 50 },
-  { text: `  "method":  "${heroEnv.method}",`, delay: 80 },
-  { text: `  "as_of":   "${heroEnv.as_of}",`, delay: 60 },
+  { text: `  "method":    "${heroEnv.method}",`, delay: 80 },
+  { text: `  "plinth_id": "${heroEnv.plinth_id}",`, delay: 60 },
   { text: `  "confidence": ${heroEnv.confidence},`, cls: "text-signal", delay: 180 },
   { text: `  "cost_usd":   ${heroEnv.cost_usd}`, cls: "text-signal", delay: 180 },
   { text: "}", delay: 80 },
@@ -178,9 +179,9 @@ function Index() {
               </div>
               <div className="border-b border-hairline px-4 py-3 font-mono text-xs leading-relaxed">
                 <span className="text-muted-foreground">{"{ "}</span>
-                <span className="text-foreground">"gtin"</span>
+                <span className="text-foreground">"url"</span>
                 <span className="text-muted-foreground">: </span>
-                <span className="text-signal break-all">"{heroCapture._meta.input.gtin}"</span>
+                <span className="text-signal break-all">"{heroCapture._meta.input.url}"</span>
                 <span className="text-muted-foreground">{" }"}</span>
               </div>
               <div className="px-4 py-4">
@@ -200,7 +201,7 @@ function Index() {
                 </pre>
               </div>
               <div className="border-t border-hairline px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                A real response, captured from the live API. URL reads are in private beta.
+                A real response, captured live from the product URL above. Confidence and cost stamped in.
               </div>
             </div>
           </div>
