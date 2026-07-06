@@ -31,33 +31,48 @@ export const Route = createFileRoute("/")({
 
 type Line = { text: string; cls?: string; delay: number };
 
-// PLAN F0.8: the hero streams a REAL captured response, verbatim from the live
-// extraction worker (src/data/hero-capture.json). Never hand-write response values here.
-import heroCapture from "@/data/hero-capture.json";
+// The hero rotates through FOUR real captured reads (one per input type: two URLs, a
+// fuzzy name, a barcode), verbatim from the live worker (src/data/hero-reads.json).
+// Never hand-write response values; refresh via scripts/capture-hero.mjs.
+import heroReads from "@/data/hero-reads.json";
 
-const heroEnv = heroCapture.envelope;
-const heroP = heroEnv.product;
-const heroFC = heroEnv.field_confidence as Record<string, number>;
+type HeroRead = (typeof heroReads.reads)[number];
 
-const RESPONSE_LINES: Line[] = [
-  { text: "{", delay: 0 },
-  { text: `  "product": {`, delay: 90 },
-  { text: `    "title":  "${heroP.title}",`, delay: 70 },
-  { text: `    "brand":  "${heroP.brand}",`, delay: 60 },
-  { text: `    "sku":    "${heroP.sku}",`, delay: 60 },
-  { text: `    "price":  { "low": ${heroP.price.low}, "high": ${heroP.price.high}, "currency": "${heroP.price.currency}", "n_sources": ${heroP.price.n_sources} },`, delay: 70 },
-  { text: `    "availability": "${heroP.availability}"`, delay: 60 },
-  { text: "  },", delay: 50 },
-  { text: '  "field_confidence": {', delay: 90 },
-  { text: `    "title": ${heroFC.title},  "brand": ${heroFC.brand},`, delay: 60 },
-  { text: `    "sku":   ${heroFC.sku},   "priceLow": ${heroFC.priceLow}`, delay: 60 },
-  { text: "  },", delay: 50 },
-  { text: `  "method":    "${heroEnv.method}",`, delay: 80 },
-  { text: `  "plinth_id": "${heroEnv.plinth_id}",`, delay: 60 },
-  { text: `  "confidence": ${heroEnv.confidence},`, cls: "text-signal", delay: 180 },
-  { text: `  "cost_usd":   ${heroEnv.cost_usd}`, cls: "text-signal", delay: 180 },
-  { text: "}", delay: 80 },
-];
+// Build the streamed JSON lines for one read's envelope, showing only fields present.
+function buildLines(r: HeroRead): Line[] {
+  const p = r.product as unknown as Record<string, unknown>;
+  const fc = (r.field_confidence ?? {}) as unknown as Record<string, number>;
+  const price = p.price as { low: number; high: number; currency: string; n_sources: number } | null;
+  const attrs = p.attributes as Record<string, string> | null;
+  const lines: Line[] = [{ text: "{", delay: 0 }, { text: `  "product": {`, delay: 90 }];
+  lines.push({ text: `    "title":  ${JSON.stringify(p.title)},`, delay: 70 });
+  if (p.brand) lines.push({ text: `    "brand":  ${JSON.stringify(p.brand)},`, delay: 60 });
+  if (p.sku) lines.push({ text: `    "sku":    ${JSON.stringify(p.sku)},`, delay: 55 });
+  if (p.category) lines.push({ text: `    "category": ${JSON.stringify(p.category)},`, delay: 55 });
+  if (price) lines.push({ text: `    "price":  { "low": ${price.low}, "high": ${price.high}, "currency": "${price.currency}", "n_sources": ${price.n_sources} },`, delay: 70 });
+  if (attrs) lines.push({ text: `    "attributes": ${JSON.stringify(attrs)},`, delay: 60 });
+  lines.push({ text: `    "availability": ${JSON.stringify(p.availability ?? "unknown")}`, delay: 55 });
+  lines.push({ text: "  },", delay: 50 });
+  const fcKeys = Object.keys(fc).slice(0, 4);
+  if (fcKeys.length) {
+    lines.push({ text: '  "field_confidence": {', delay: 80 });
+    lines.push({ text: "    " + fcKeys.map((k) => `"${k}": ${fc[k]}`).join(", "), delay: 60 });
+    lines.push({ text: "  },", delay: 50 });
+  }
+  lines.push({ text: `  "method":    ${JSON.stringify(r.method)},`, delay: 70 });
+  if (r.plinth_id) lines.push({ text: `  "plinth_id": ${JSON.stringify(r.plinth_id)},`, delay: 55 });
+  lines.push({ text: `  "confidence": ${r.confidence},`, cls: "text-signal", delay: 160 });
+  lines.push({ text: `  "cost_usd":   ${r.cost_usd}`, cls: "text-signal", delay: 160 });
+  lines.push({ text: "}", delay: 80 });
+  return lines;
+}
+
+// The input line value + its key, for the request panel.
+function heroInput(r: HeroRead): { key: string; value: string } {
+  const i = r.input as unknown as Record<string, string>;
+  const key = Object.keys(i)[0];
+  return { key, value: i[key] };
+}
 
 const TOOLS = [
   { name: "read_product", desc: "One reference (URL/GTIN) → typed product object.", live: true },
@@ -75,6 +90,7 @@ function useStream(lines: Line[]) {
     return out;
   }, [lines]);
   useEffect(() => {
+    setShown(0); // restart from the top when the read (and its lines) change
     const timers = cumulative.map((t, i) => setTimeout(() => setShown((s) => Math.max(s, i + 1)), t));
     return () => timers.forEach(clearTimeout);
   }, [cumulative]);
@@ -126,8 +142,18 @@ function WaitlistForm() {
 }
 
 function Index() {
-  const shown = useStream(RESPONSE_LINES);
-  const done = shown >= RESPONSE_LINES.length;
+  const [idx, setIdx] = useState(0);
+  const read = heroReads.reads[idx];
+  const lines = useMemo(() => buildLines(read), [read]);
+  const shown = useStream(lines);
+  const done = shown >= lines.length;
+  const input = heroInput(read);
+  // Rotate to the next real read after this one finishes streaming, then holds briefly.
+  useEffect(() => {
+    if (!done) return;
+    const t = setTimeout(() => setIdx((i) => (i + 1) % heroReads.reads.length), 3800);
+    return () => clearTimeout(t);
+  }, [done, idx]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -170,7 +196,7 @@ function Index() {
                 <div className="flex items-center gap-2">
                   <span className="rounded-sm bg-signal/15 px-1.5 py-0.5 text-signal">POST</span>
                   <span className="text-muted-foreground">/api/v1/</span>
-                  <span className="text-foreground">read_product</span>
+                  <span className="text-foreground">{read.tool}</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <span className={`dot ${done ? "" : "animate-pulse"}`} />
@@ -179,9 +205,9 @@ function Index() {
               </div>
               <div className="border-b border-hairline px-4 py-3 font-mono text-xs leading-relaxed">
                 <span className="text-muted-foreground">{"{ "}</span>
-                <span className="text-foreground">"url"</span>
+                <span className="text-foreground">"{input.key}"</span>
                 <span className="text-muted-foreground">: </span>
-                <span className="text-signal break-all">"{heroCapture._meta.input.url}"</span>
+                <span className="text-signal break-all">"{input.value}"</span>
                 <span className="text-muted-foreground">{" }"}</span>
               </div>
               <div className="px-4 py-4">
@@ -189,7 +215,7 @@ function Index() {
                   <span>response</span><span>application/json</span>
                 </div>
                 <pre className="min-h-[440px] overflow-x-auto font-mono text-[12.5px] leading-[1.7] text-foreground">
-                  {RESPONSE_LINES.slice(0, shown).map((l, i) => {
+                  {lines.slice(0, shown).map((l, i) => {
                     const isLast = i === shown - 1 && !done;
                     return (
                       <div key={i} className={`stream-line ${l.cls ?? ""} ${isLast ? "caret" : ""}`}>
@@ -200,8 +226,19 @@ function Index() {
                   {shown === 0 && <div className="caret">&nbsp;</div>}
                 </pre>
               </div>
-              <div className="border-t border-hairline px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                A real response, captured live from the product URL above. Confidence and cost stamped in.
+              <div className="flex items-center justify-between gap-4 border-t border-hairline px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                <span>A real response, captured live from the request above. URL, name, or barcode: same typed object.</span>
+                <span className="flex shrink-0 items-center gap-1.5">
+                  {heroReads.reads.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      aria-label={`Show example ${i + 1}`}
+                      onClick={() => setIdx(i)}
+                      className={`h-1.5 w-1.5 rounded-full transition-colors ${i === idx ? "bg-signal" : "bg-hairline hover:bg-muted-foreground"}`}
+                    />
+                  ))}
+                </span>
               </div>
             </div>
           </div>
