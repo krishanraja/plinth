@@ -164,6 +164,75 @@ export type Database = {
         }
         Relationships: []
       }
+      golden_eval_runs: {
+        Row: {
+          id: string
+          created_at: string
+          calibration_version: string | null
+          split: string | null
+          n: number | null
+          precision_at_gate: number | null
+          precision_wilson_low: number | null
+          adversarial_rejection: number | null
+          ece: number | null
+          notes: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          calibration_version?: string | null
+          split?: string | null
+          n?: number | null
+          precision_at_gate?: number | null
+          precision_wilson_low?: number | null
+          adversarial_rejection?: number | null
+          ece?: number | null
+          notes?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          calibration_version?: string | null
+          notes?: string | null
+        }
+        Relationships: []
+      }
+      outcome_reports: {
+        Row: {
+          id: string
+          created_at: string
+          user_id: string
+          request_id: string | null
+          plinth_id: string | null
+          outcome: string
+          observed_price: number | null
+          observed_currency: string | null
+          note: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          user_id: string
+          request_id?: string | null
+          plinth_id?: string | null
+          outcome: string
+          observed_price?: number | null
+          observed_currency?: string | null
+          note?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          user_id?: string
+          request_id?: string | null
+          plinth_id?: string | null
+          outcome?: string
+          observed_price?: number | null
+          observed_currency?: string | null
+          note?: string | null
+        }
+        Relationships: []
+      }
       product_cache: {
         Row: {
           cache_key: string
@@ -593,6 +662,33 @@ export type Database = {
           included_calls: number
           used_billable: number
           cost_spent_cents: number
+        }[]
+      }
+      northstar_weekly: {
+        Args: { _since?: string }
+        Returns: {
+          user_id: string
+          week: string
+          trusted_reads: number
+          total_calls: number
+        }[]
+      }
+      trust_rate_by_method: {
+        Args: { _since?: string }
+        Returns: {
+          method: string
+          calls: number
+          gate_pass: number
+          gate_pass_rate: number
+        }[]
+      }
+      kill_dashboard: {
+        Args: Record<string, never>
+        Returns: {
+          signal: string
+          value: number | null
+          red_threshold: string
+          status: string
         }[]
       }
       rate_check: {

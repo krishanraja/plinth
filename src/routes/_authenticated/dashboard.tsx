@@ -36,6 +36,7 @@ function DashboardLayout() {
             { to: "/dashboard/usage", label: "Usage" },
             { to: "/dashboard/billing", label: "Billing" },
             { to: "/dashboard/webhooks", label: "Webhooks" },
+            { to: "/dashboard/metrics", label: "Metrics" },
           ].map((i) => (
             <Link
               key={i.to}

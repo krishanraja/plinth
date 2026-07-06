@@ -28,12 +28,14 @@ import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authe
 import { Route as DocsApiResolveProductRouteImport } from './routes/docs.api.resolve-product'
 import { Route as DocsApiReadProductRouteImport } from './routes/docs.api.read-product'
 import { Route as ApiV1Resolve_productRouteImport } from './routes/api/v1/resolve_product'
+import { Route as ApiV1Report_outcomeRouteImport } from './routes/api/v1/report_outcome'
 import { Route as ApiV1Read_productRouteImport } from './routes/api/v1/read_product'
 import { Route as ApiV1Compare_productsRouteImport } from './routes/api/v1/compare_products'
 import { Route as ApiV1Brief_productRouteImport } from './routes/api/v1/brief_product'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as AuthenticatedDashboardWebhooksRouteImport } from './routes/_authenticated/dashboard.webhooks'
 import { Route as AuthenticatedDashboardUsageRouteImport } from './routes/_authenticated/dashboard.usage'
+import { Route as AuthenticatedDashboardMetricsRouteImport } from './routes/_authenticated/dashboard.metrics'
 import { Route as AuthenticatedDashboardKeysRouteImport } from './routes/_authenticated/dashboard.keys'
 import { Route as AuthenticatedDashboardBillingRouteImport } from './routes/_authenticated/dashboard.billing'
 
@@ -132,6 +134,11 @@ const ApiV1Resolve_productRoute = ApiV1Resolve_productRouteImport.update({
   path: '/api/v1/resolve_product',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1Report_outcomeRoute = ApiV1Report_outcomeRouteImport.update({
+  id: '/api/v1/report_outcome',
+  path: '/api/v1/report_outcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1Read_productRoute = ApiV1Read_productRouteImport.update({
   id: '/api/v1/read_product',
   path: '/api/v1/read_product',
@@ -164,6 +171,12 @@ const AuthenticatedDashboardUsageRoute =
     path: '/usage',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardMetricsRoute =
+  AuthenticatedDashboardMetricsRouteImport.update({
+    id: '/metrics',
+    path: '/metrics',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardKeysRoute =
   AuthenticatedDashboardKeysRouteImport.update({
     id: '/keys',
@@ -194,12 +207,14 @@ export interface FileRoutesByFullPath {
   '/docs/': typeof DocsIndexRoute
   '/dashboard/billing': typeof AuthenticatedDashboardBillingRoute
   '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
+  '/dashboard/metrics': typeof AuthenticatedDashboardMetricsRoute
   '/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
   '/dashboard/webhooks': typeof AuthenticatedDashboardWebhooksRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/api/v1/brief_product': typeof ApiV1Brief_productRoute
   '/api/v1/compare_products': typeof ApiV1Compare_productsRoute
   '/api/v1/read_product': typeof ApiV1Read_productRoute
+  '/api/v1/report_outcome': typeof ApiV1Report_outcomeRoute
   '/api/v1/resolve_product': typeof ApiV1Resolve_productRoute
   '/docs/api/read-product': typeof DocsApiReadProductRoute
   '/docs/api/resolve-product': typeof DocsApiResolveProductRoute
@@ -220,12 +235,14 @@ export interface FileRoutesByTo {
   '/docs': typeof DocsIndexRoute
   '/dashboard/billing': typeof AuthenticatedDashboardBillingRoute
   '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
+  '/dashboard/metrics': typeof AuthenticatedDashboardMetricsRoute
   '/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
   '/dashboard/webhooks': typeof AuthenticatedDashboardWebhooksRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/api/v1/brief_product': typeof ApiV1Brief_productRoute
   '/api/v1/compare_products': typeof ApiV1Compare_productsRoute
   '/api/v1/read_product': typeof ApiV1Read_productRoute
+  '/api/v1/report_outcome': typeof ApiV1Report_outcomeRoute
   '/api/v1/resolve_product': typeof ApiV1Resolve_productRoute
   '/docs/api/read-product': typeof DocsApiReadProductRoute
   '/docs/api/resolve-product': typeof DocsApiResolveProductRoute
@@ -250,12 +267,14 @@ export interface FileRoutesById {
   '/docs/': typeof DocsIndexRoute
   '/_authenticated/dashboard/billing': typeof AuthenticatedDashboardBillingRoute
   '/_authenticated/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
+  '/_authenticated/dashboard/metrics': typeof AuthenticatedDashboardMetricsRoute
   '/_authenticated/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
   '/_authenticated/dashboard/webhooks': typeof AuthenticatedDashboardWebhooksRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/api/v1/brief_product': typeof ApiV1Brief_productRoute
   '/api/v1/compare_products': typeof ApiV1Compare_productsRoute
   '/api/v1/read_product': typeof ApiV1Read_productRoute
+  '/api/v1/report_outcome': typeof ApiV1Report_outcomeRoute
   '/api/v1/resolve_product': typeof ApiV1Resolve_productRoute
   '/docs/api/read-product': typeof DocsApiReadProductRoute
   '/docs/api/resolve-product': typeof DocsApiResolveProductRoute
@@ -280,12 +299,14 @@ export interface FileRouteTypes {
     | '/docs/'
     | '/dashboard/billing'
     | '/dashboard/keys'
+    | '/dashboard/metrics'
     | '/dashboard/usage'
     | '/dashboard/webhooks'
     | '/api/stripe/webhook'
     | '/api/v1/brief_product'
     | '/api/v1/compare_products'
     | '/api/v1/read_product'
+    | '/api/v1/report_outcome'
     | '/api/v1/resolve_product'
     | '/docs/api/read-product'
     | '/docs/api/resolve-product'
@@ -306,12 +327,14 @@ export interface FileRouteTypes {
     | '/docs'
     | '/dashboard/billing'
     | '/dashboard/keys'
+    | '/dashboard/metrics'
     | '/dashboard/usage'
     | '/dashboard/webhooks'
     | '/api/stripe/webhook'
     | '/api/v1/brief_product'
     | '/api/v1/compare_products'
     | '/api/v1/read_product'
+    | '/api/v1/report_outcome'
     | '/api/v1/resolve_product'
     | '/docs/api/read-product'
     | '/docs/api/resolve-product'
@@ -335,12 +358,14 @@ export interface FileRouteTypes {
     | '/docs/'
     | '/_authenticated/dashboard/billing'
     | '/_authenticated/dashboard/keys'
+    | '/_authenticated/dashboard/metrics'
     | '/_authenticated/dashboard/usage'
     | '/_authenticated/dashboard/webhooks'
     | '/api/stripe/webhook'
     | '/api/v1/brief_product'
     | '/api/v1/compare_products'
     | '/api/v1/read_product'
+    | '/api/v1/report_outcome'
     | '/api/v1/resolve_product'
     | '/docs/api/read-product'
     | '/docs/api/resolve-product'
@@ -360,6 +385,7 @@ export interface RootRouteChildren {
   ApiV1Brief_productRoute: typeof ApiV1Brief_productRoute
   ApiV1Compare_productsRoute: typeof ApiV1Compare_productsRoute
   ApiV1Read_productRoute: typeof ApiV1Read_productRoute
+  ApiV1Report_outcomeRoute: typeof ApiV1Report_outcomeRoute
   ApiV1Resolve_productRoute: typeof ApiV1Resolve_productRoute
 }
 
@@ -498,6 +524,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1Resolve_productRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/report_outcome': {
+      id: '/api/v1/report_outcome'
+      path: '/api/v1/report_outcome'
+      fullPath: '/api/v1/report_outcome'
+      preLoaderRoute: typeof ApiV1Report_outcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/read_product': {
       id: '/api/v1/read_product'
       path: '/api/v1/read_product'
@@ -540,6 +573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardUsageRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/metrics': {
+      id: '/_authenticated/dashboard/metrics'
+      path: '/metrics'
+      fullPath: '/dashboard/metrics'
+      preLoaderRoute: typeof AuthenticatedDashboardMetricsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/keys': {
       id: '/_authenticated/dashboard/keys'
       path: '/keys'
@@ -560,6 +600,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardBillingRoute: typeof AuthenticatedDashboardBillingRoute
   AuthenticatedDashboardKeysRoute: typeof AuthenticatedDashboardKeysRoute
+  AuthenticatedDashboardMetricsRoute: typeof AuthenticatedDashboardMetricsRoute
   AuthenticatedDashboardUsageRoute: typeof AuthenticatedDashboardUsageRoute
   AuthenticatedDashboardWebhooksRoute: typeof AuthenticatedDashboardWebhooksRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
@@ -569,6 +610,7 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
     AuthenticatedDashboardBillingRoute: AuthenticatedDashboardBillingRoute,
     AuthenticatedDashboardKeysRoute: AuthenticatedDashboardKeysRoute,
+    AuthenticatedDashboardMetricsRoute: AuthenticatedDashboardMetricsRoute,
     AuthenticatedDashboardUsageRoute: AuthenticatedDashboardUsageRoute,
     AuthenticatedDashboardWebhooksRoute: AuthenticatedDashboardWebhooksRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
@@ -627,6 +669,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1Brief_productRoute: ApiV1Brief_productRoute,
   ApiV1Compare_productsRoute: ApiV1Compare_productsRoute,
   ApiV1Read_productRoute: ApiV1Read_productRoute,
+  ApiV1Report_outcomeRoute: ApiV1Report_outcomeRoute,
   ApiV1Resolve_productRoute: ApiV1Resolve_productRoute,
 }
 export const routeTree = rootRouteImport
