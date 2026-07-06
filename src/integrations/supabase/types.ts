@@ -374,6 +374,7 @@ export type Database = {
           request_id: string | null
           confidence: number | null
           product_returned: boolean | null
+          billable: boolean
           domain: string | null
           envelope_hash: string | null
           calibration_version: string | null
@@ -393,6 +394,7 @@ export type Database = {
           request_id?: string | null
           confidence?: number | null
           product_returned?: boolean | null
+          billable?: boolean
           domain?: string | null
           envelope_hash?: string | null
           calibration_version?: string | null
@@ -412,6 +414,7 @@ export type Database = {
           request_id?: string | null
           confidence?: number | null
           product_returned?: boolean | null
+          billable?: boolean
           domain?: string | null
           envelope_hash?: string | null
           calibration_version?: string | null
@@ -580,6 +583,17 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      entitlement_check: {
+        Args: { _user_id: string }
+        Returns: {
+          allowed: boolean
+          reason: string
+          plan_id: string
+          included_calls: number
+          used_billable: number
+          cost_spent_cents: number
+        }[]
       }
       rate_check: {
         Args: { _user_id: string }

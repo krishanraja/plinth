@@ -37,6 +37,13 @@ export const Route = createFileRoute("/api/v1/resolve_product")({
           );
         }
 
+        const { entitlementCheck, quotaBlockedBody } = await import("@/integrations/supabase/entitlement.server");
+        const ent = await entitlementCheck(principal.userId);
+        if (!ent.allowed) {
+          const { APP_ORIGIN } = await import("@/config/product");
+          return json(quotaBlockedBody(ent, `${APP_ORIGIN}/dashboard/billing`), 402);
+        }
+
         let body: unknown;
         try {
           body = await request.json();
@@ -83,6 +90,7 @@ export const Route = createFileRoute("/api/v1/resolve_product")({
               request_id: stamp.request_id,
               confidence: stamp.confidence,
               product_returned: stamp.product_returned,
+              billable: stamp.billable,
               domain: stamp.domain,
               envelope_hash: stamp.envelope_hash,
               calibration_version: stamp.calibration_version,
