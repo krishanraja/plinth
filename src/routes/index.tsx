@@ -24,7 +24,26 @@ export const Route = createFileRoute("/")({
           "Agents can decide what to buy. Reading the product page is where they still break. Plinth reads it for them.",
       },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "https://onplinth.io/" }],
+    // FAQPage structured data: mirrors the on-page FAQ. Google can render it as a rich
+    // result and AI answer engines quote it directly when asked about Plinth.
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            { "@type": "Question", name: "Where does the data come from?", acceptedAnswer: { "@type": "Answer", text: "JSON-LD and OpenGraph first, a Shopify path for Shopify stores, barcode databases for GTINs, and an unblocker for bot-hostile retailers. The source method is on every response." } },
+            { "@type": "Question", name: "Why a confidence score?", acceptedAnswer: { "@type": "Answer", text: "Because product pages lie. Plinth returns a calibrated confidence per field and overall, where the 0.7 gate means about 70 percent likely correct. You decide the threshold, and you only pay for reads that clear the gate." } },
+            { "@type": "Question", name: "Is price live?", acceptedAnswer: { "@type": "Answer", text: "Price is a band with an as_of timestamp and a source count. Plinth does not present a single live number as a guarantee." } },
+            { "@type": "Question", name: "What is x402?", acceptedAnswer: { "@type": "Answer", text: "An open micropayment standard. Agents pay per call in USDC on Base, with no signup and no key rotation. Base Sepolia testnet in beta." } },
+            { "@type": "Question", name: "Why not Diffbot?", acceptedAnswer: { "@type": "Answer", text: "Diffbot returns a typed object but does not score confidence per field, does not stamp cost in the response, and has no MCP server or x402 surface, so an agent cannot discover it and pay on its own." } },
+            { "@type": "Question", name: "Why not roll your own with Firecrawl and GPT?", acceptedAnswer: { "@type": "Answer", text: "You can. You also own the schema, the cache policy, the confidence rubric, the price-band semantics, the barcode merge, the MCP server, and the x402 settlement. Plinth is that work, finished, behind one call." } },
+          ],
+        }),
+      },
+    ],
   }),
   component: Index,
 });

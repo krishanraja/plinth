@@ -1,0 +1,35 @@
+# Plinth robots policy. Plinth is agent-native, so AI answer engines and crawlers
+# are explicitly welcome: we want to be read, quoted, and cited.
+
+User-agent: *
+Allow: /
+Disallow: /dashboard
+
+# AI answer engines and training/search crawlers (GEO): explicitly allowed.
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: CCBot
+Allow: /
+User-agent: Bytespider
+Allow: /
+
+Sitemap: https://onplinth.io/sitemap.xml
+# LLM-oriented site summary (GEO): https://onplinth.io/llms.txt

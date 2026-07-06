@@ -93,7 +93,57 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Plinth" },
+      { property: "og:url", content: "https://onplinth.io" },
+      { property: "og:image", content: "https://onplinth.io/og.png" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Plinth · Product data for agents" },
+      { name: "twitter:description", content: "One call turns a URL, a barcode, or a fuzzy name into a typed product object with calibrated confidence and cost stamped in. REST and MCP." },
+      { name: "twitter:image", content: "https://onplinth.io/og.png" },
+      { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1" },
+      { name: "application-name", content: "Plinth" },
+      { name: "author", content: "Plinth" },
+    ],
+    // JSON-LD structured data: what Google rich results AND AI answer engines consume.
+    // Fitting for a product-data company to ship clean structured data about itself.
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://onplinth.io/#org",
+              name: "Plinth",
+              url: "https://onplinth.io",
+              logo: "https://onplinth.io/apple-touch-icon.png",
+              description:
+                "Typed product data for AI agents. A product URL, barcode, or fuzzy name to a typed object with calibrated per-field confidence, a price band, and the per-call cost stamped in.",
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://onplinth.io/#website",
+              url: "https://onplinth.io",
+              name: "Plinth",
+              publisher: { "@id": "https://onplinth.io/#org" },
+            },
+            {
+              "@type": "SoftwareApplication",
+              name: "Plinth",
+              applicationCategory: "DeveloperApplication",
+              operatingSystem: "Web (REST API and MCP server)",
+              url: "https://onplinth.io",
+              description:
+                "Turns a product URL, a barcode, or a fuzzy name into a typed product object an agent can trust: calibrated per-field confidence, a price band, a stable id, and the per-call cost stamped in. REST and MCP, payable by key or per call over x402.",
+              offers: [
+                { "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD", description: "1,000 trusted reads per month, no card" },
+                { "@type": "Offer", name: "Starter", price: "29", priceCurrency: "USD", description: "5,000 trusted reads per month" },
+                { "@type": "Offer", name: "Growth", price: "199", priceCurrency: "USD", description: "50,000 trusted reads per month" },
+              ],
+            },
+          ],
+        }),
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
