@@ -34,7 +34,7 @@ weeks, not by a config file.
 | Asset | State | Where | Check |
 |---|---|---|---|
 | robots.txt | shipped | `public/robots.txt` | `curl https://onplinth.io/robots.txt` 200, explicitly allows GPTBot, ClaudeBot, PerplexityBot, OAI-SearchBot, Google-Extended, etc, points to the sitemap |
-| sitemap.xml | shipped | `public/sitemap.xml` | `curl .../sitemap.xml` 200, lists the public routes |
+| sitemap.xml | shipped, AUTO-GENERATED | `vite.config.ts` sitemapPlugin writes `public/sitemap.xml` from the route files on every build | `curl .../sitemap.xml` 200; add a public page route and it appears automatically, no manual edit |
 | llms.txt | shipped | `public/llms.txt` | `curl .../llms.txt` 200, the curated LLM summary (GEO keystone) |
 | JSON-LD Organization + WebSite + SoftwareApplication | shipped | `src/routes/__root.tsx` head | view-source has `application/ld+json` with the offers |
 | JSON-LD FAQPage | shipped | `src/routes/index.tsx` head | view-source has the FAQPage graph |
