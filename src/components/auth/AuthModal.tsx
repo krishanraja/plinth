@@ -31,7 +31,7 @@ export function AuthModal({ open, onOpenChange }: { open: boolean; onOpenChange:
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">Sign in to Plinth</DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Magic link, no password. New here? You'll join the waitlist automatically.
+            Magic link, no password. New here? Signing in creates your account.
           </DialogDescription>
         </DialogHeader>
         {sent ? (

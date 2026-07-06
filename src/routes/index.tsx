@@ -104,9 +104,9 @@ function WaitlistForm() {
   if (done) {
     return (
       <div className="rounded-md border border-hairline bg-surface p-6">
-        <div className="font-display text-2xl text-foreground">You're on the list.</div>
+        <div className="font-display text-2xl text-foreground">You're in.</div>
         <p className="mt-2 text-sm text-muted-foreground">
-          We're approving developers in small batches. Watch your inbox.
+          Sign in with the magic link to create a key and make your first call. It is free to start.
         </p>
       </div>
     );
@@ -317,9 +317,9 @@ function Index() {
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {[
-              { name: "Free", price: "$0", desc: "1,000 calls/mo · card required", feats: ["Single secret API key","REST + MCP","Email support"] },
-              { name: "Starter", price: "$29", desc: "5,000 calls included · $0.01 overage", feats: ["Webhooks","All confidence levels","Priority email"], featured: true },
-              { name: "Growth", price: "$199", desc: "50,000 calls included · $0.005 overage", feats: ["Higher rate limits","Slack channel","SLA"] },
+              { name: "Free", price: "$0", desc: "1,000 trusted reads/mo · no card", feats: ["Single secret API key","REST + MCP","Email support"] },
+              { name: "Starter", price: "$29", desc: "5,000 trusted reads · $0.01 overage", feats: ["Higher rate limits","All confidence levels","Priority email"], featured: true },
+              { name: "Growth", price: "$199", desc: "50,000 trusted reads · $0.005 overage", feats: ["Highest rate limits","Slack channel","SLA"] },
             ].map((p) => (
               <div key={p.name} className={`rounded-md border p-7 ${p.featured ? "border-signal bg-background" : "border-hairline bg-background"}`}>
                 <div className="flex items-baseline justify-between">
@@ -405,10 +405,10 @@ function Index() {
       {/* WAITLIST */}
       <section id="waitlist" className="border-b border-hairline">
         <div className="mx-auto max-w-[820px] px-6 py-24 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-signal">Limited beta</p>
-          <h2 className="font-display mt-4 text-5xl text-foreground">Request access.</h2>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-signal">Early access</p>
+          <h2 className="font-display mt-4 text-5xl text-foreground">Start building.</h2>
           <p className="mt-4 text-muted-foreground">
-            We're approving small batches of developers each week. Tell us what you're building.
+            Sign in with a magic link, create a key, and make your first call. Free to start, no card required.
           </p>
           <div className="mt-10 text-left"><WaitlistForm /></div>
         </div>
