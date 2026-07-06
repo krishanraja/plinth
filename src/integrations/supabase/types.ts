@@ -164,6 +164,42 @@ export type Database = {
         }
         Relationships: []
       }
+      outcome_reports: {
+        Row: {
+          id: string
+          created_at: string
+          user_id: string
+          request_id: string | null
+          plinth_id: string | null
+          outcome: string
+          observed_price: number | null
+          observed_currency: string | null
+          note: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          user_id: string
+          request_id?: string | null
+          plinth_id?: string | null
+          outcome: string
+          observed_price?: number | null
+          observed_currency?: string | null
+          note?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          user_id?: string
+          request_id?: string | null
+          plinth_id?: string | null
+          outcome?: string
+          observed_price?: number | null
+          observed_currency?: string | null
+          note?: string | null
+        }
+        Relationships: []
+      }
       product_cache: {
         Row: {
           cache_key: string

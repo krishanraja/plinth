@@ -28,6 +28,7 @@ import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authe
 import { Route as DocsApiResolveProductRouteImport } from './routes/docs.api.resolve-product'
 import { Route as DocsApiReadProductRouteImport } from './routes/docs.api.read-product'
 import { Route as ApiV1Resolve_productRouteImport } from './routes/api/v1/resolve_product'
+import { Route as ApiV1Report_outcomeRouteImport } from './routes/api/v1/report_outcome'
 import { Route as ApiV1Read_productRouteImport } from './routes/api/v1/read_product'
 import { Route as ApiV1Compare_productsRouteImport } from './routes/api/v1/compare_products'
 import { Route as ApiV1Brief_productRouteImport } from './routes/api/v1/brief_product'
@@ -132,6 +133,11 @@ const ApiV1Resolve_productRoute = ApiV1Resolve_productRouteImport.update({
   path: '/api/v1/resolve_product',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1Report_outcomeRoute = ApiV1Report_outcomeRouteImport.update({
+  id: '/api/v1/report_outcome',
+  path: '/api/v1/report_outcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1Read_productRoute = ApiV1Read_productRouteImport.update({
   id: '/api/v1/read_product',
   path: '/api/v1/read_product',
@@ -200,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/brief_product': typeof ApiV1Brief_productRoute
   '/api/v1/compare_products': typeof ApiV1Compare_productsRoute
   '/api/v1/read_product': typeof ApiV1Read_productRoute
+  '/api/v1/report_outcome': typeof ApiV1Report_outcomeRoute
   '/api/v1/resolve_product': typeof ApiV1Resolve_productRoute
   '/docs/api/read-product': typeof DocsApiReadProductRoute
   '/docs/api/resolve-product': typeof DocsApiResolveProductRoute
@@ -226,6 +233,7 @@ export interface FileRoutesByTo {
   '/api/v1/brief_product': typeof ApiV1Brief_productRoute
   '/api/v1/compare_products': typeof ApiV1Compare_productsRoute
   '/api/v1/read_product': typeof ApiV1Read_productRoute
+  '/api/v1/report_outcome': typeof ApiV1Report_outcomeRoute
   '/api/v1/resolve_product': typeof ApiV1Resolve_productRoute
   '/docs/api/read-product': typeof DocsApiReadProductRoute
   '/docs/api/resolve-product': typeof DocsApiResolveProductRoute
@@ -256,6 +264,7 @@ export interface FileRoutesById {
   '/api/v1/brief_product': typeof ApiV1Brief_productRoute
   '/api/v1/compare_products': typeof ApiV1Compare_productsRoute
   '/api/v1/read_product': typeof ApiV1Read_productRoute
+  '/api/v1/report_outcome': typeof ApiV1Report_outcomeRoute
   '/api/v1/resolve_product': typeof ApiV1Resolve_productRoute
   '/docs/api/read-product': typeof DocsApiReadProductRoute
   '/docs/api/resolve-product': typeof DocsApiResolveProductRoute
@@ -286,6 +295,7 @@ export interface FileRouteTypes {
     | '/api/v1/brief_product'
     | '/api/v1/compare_products'
     | '/api/v1/read_product'
+    | '/api/v1/report_outcome'
     | '/api/v1/resolve_product'
     | '/docs/api/read-product'
     | '/docs/api/resolve-product'
@@ -312,6 +322,7 @@ export interface FileRouteTypes {
     | '/api/v1/brief_product'
     | '/api/v1/compare_products'
     | '/api/v1/read_product'
+    | '/api/v1/report_outcome'
     | '/api/v1/resolve_product'
     | '/docs/api/read-product'
     | '/docs/api/resolve-product'
@@ -341,6 +352,7 @@ export interface FileRouteTypes {
     | '/api/v1/brief_product'
     | '/api/v1/compare_products'
     | '/api/v1/read_product'
+    | '/api/v1/report_outcome'
     | '/api/v1/resolve_product'
     | '/docs/api/read-product'
     | '/docs/api/resolve-product'
@@ -360,6 +372,7 @@ export interface RootRouteChildren {
   ApiV1Brief_productRoute: typeof ApiV1Brief_productRoute
   ApiV1Compare_productsRoute: typeof ApiV1Compare_productsRoute
   ApiV1Read_productRoute: typeof ApiV1Read_productRoute
+  ApiV1Report_outcomeRoute: typeof ApiV1Report_outcomeRoute
   ApiV1Resolve_productRoute: typeof ApiV1Resolve_productRoute
 }
 
@@ -498,6 +511,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1Resolve_productRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/report_outcome': {
+      id: '/api/v1/report_outcome'
+      path: '/api/v1/report_outcome'
+      fullPath: '/api/v1/report_outcome'
+      preLoaderRoute: typeof ApiV1Report_outcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/read_product': {
       id: '/api/v1/read_product'
       path: '/api/v1/read_product'
@@ -627,6 +647,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1Brief_productRoute: ApiV1Brief_productRoute,
   ApiV1Compare_productsRoute: ApiV1Compare_productsRoute,
   ApiV1Read_productRoute: ApiV1Read_productRoute,
+  ApiV1Report_outcomeRoute: ApiV1Report_outcomeRoute,
   ApiV1Resolve_productRoute: ApiV1Resolve_productRoute,
 }
 export const routeTree = rootRouteImport
