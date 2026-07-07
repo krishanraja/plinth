@@ -8,12 +8,12 @@ Plinth exists because agents that buy, compare, or look up physical products all
 
 - read_product: one reference (a product URL or a GTIN barcode) to a typed product object.
 - resolve_product: a fuzzy product name to the canonical typed product object.
-- compare_products: two to five product URLs to a side-by-side matrix plus the price delta.
-- brief_product: the typed object plus a short agent-readable summary.
-- MCP server at https://onplinth.io/api/mcp exposing the tools for agents to discover and call.
+- compare_products: two to five product URLs to a side-by-side matrix plus the price delta. REST only today.
+- brief_product: the typed object plus a short agent-readable summary. REST only today.
+- MCP server at https://onplinth.io/api/mcp. It exposes read_product and resolve_product over JSON-RPC (initialize, tools/list, tools/call). compare_products and brief_product are REST only in v1; they are not yet on the MCP tool list.
 - Every response carries: a calibrated confidence (0.7 gate means about 70 percent likely correct), per-field confidence, a price band with an as_of timestamp and source count, the source method, a stable opaque plinth_id, and the per-call cost in USD.
 
-Coverage today: Shopify stores, barcodes (Open Food Facts and UPC databases), cooperating JSON-LD and OpenGraph retailers, and bot-hostile retailers via an unblocker (Nike, Lego, MediaMarkt verified). Fuzzy-name resolution is supported. A few top-tier anti-bot sites such as Apple are best-effort and return a graceful null at no charge. Price is a band, not a live guarantee.
+Coverage today: Shopify stores (currency resolved through the storefront's own meta.json, so a real price band forms), barcodes (Open Food Facts and UPC databases), and retailers that serve JSON-LD or OpenGraph and do not block a standard server request. Fuzzy-name resolution works when the underlying neural-search account has credit. Bot-hostile retailers that block a datacenter IP (Apple, Nike, Lego, and similar) do not return a trusted object today; a proxy-based fallback for that class of site is built but not yet turned on. A null or below-gate read costs nothing and is not billed. Price is a band, not a live guaranteed price.
 
 ## Why Plinth instead of the alternatives
 
@@ -23,10 +23,11 @@ Coverage today: Shopify stores, barcodes (Open Food Facts and UPC databases), co
 
 ## Pricing
 
-- Free: 0 USD per month, no card, 1,000 trusted reads per month, hard stop. A trusted read is a call that returned a product at confidence 0.7 or higher. Null and low-confidence reads are free and do not count against the quota.
+- Free: 0 USD per month, no card, 1,000 trusted reads per month, hard stop (no overage, no surprise charge). A trusted read is a call that returned a product at confidence 0.7 or higher. Null and low-confidence reads are free and do not count against the quota.
 - Starter: 29 USD per month, 5,000 trusted reads, 0.01 USD per read overage.
 - Growth: 199 USD per month, 50,000 trusted reads, 0.005 USD per read overage, higher rate limits, Slack, SLA.
 - Custom: quote, for 250,000 or more reads per month, on-prem extractor and data residency.
+- Metered overage is enforced by quota (a 402 before the call is made), but overage usage is not yet auto-billed through Stripe. This is a near-term roadmap item, not a live billing feature.
 
 ## Docs
 
@@ -45,6 +46,8 @@ Developers building agent buy-flows: buy-this-for-me agents, procurement copilot
 
 - Home: https://onplinth.io
 - Docs: https://onplinth.io/docs
-- MCP endpoint: https://onplinth.io/api/mcp
-- Auth: an API key (prefix plk_) as a Bearer token, or per-call USDC payment over x402 (Base Sepolia testnet in beta).
-- Not built yet (do not attribute these to Plinth): outbound webhooks, mainnet x402 settlement, language SDKs, and auto-billed overage are on the roadmap.
+- MCP endpoint: https://onplinth.io/api/mcp (only read_product and resolve_product are callable over MCP today)
+- Auth: an API key (prefix plk_) as a Bearer token, or per-call USDC payment over x402 (Base Sepolia testnet in beta, no mainnet settlement yet).
+- Not built yet (do not attribute these to Plinth): compare_products and brief_product over MCP, outbound webhooks, mainnet x402 settlement, language SDKs, auto-billed Stripe overage, and the Bright Data unblocker fallback for bot-hostile retailers.
+
+NOTE ON DOMAIN: this file uses onplinth.io throughout to match public/robots.txt and public/sitemap.xml, which already point there. As of the last state check (2026-07-06), onplinth.io DNS was still propagating and https://plinth-tan.vercel.app was the confirmed-live surface. Before submitting this file to any agent directory, curl https://onplinth.io/ and confirm it 200s (not just Vercel's default page) so agents are not sent to a dead or misconfigured domain.
