@@ -144,6 +144,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           ],
         }),
       },
+      {
+        // PostHog product analytics. Shared project; the product super-property
+        // separates ventures. Publishable client key (safe in page markup).
+        children:
+          "(function(){var s=document.createElement('script');s.async=true;s.src='https://us-assets.i.posthog.com/static/array.js';s.onload=function(){window.posthog.init('phc_uNKPzXzC9QCgkZo2VcTmpwVTNuKtZpghXdeuA5ciBBaz',{api_host:'https://us.i.posthog.com',person_profiles:'identified_only',capture_pageview:true,capture_pageleave:true});window.posthog.register({product:'plinth'});};document.head.appendChild(s);})();",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
